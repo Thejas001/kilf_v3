@@ -1,7 +1,7 @@
 ---
 name: "Vairamuthu"
 role: "Poet · Lyricist"
-photo: vairamuthu.jpg
+photo: "11_Vairamuthu.webp"
 categories: [literature, music]
 order: 110
 featured: true

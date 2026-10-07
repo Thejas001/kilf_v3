@@ -1,7 +1,7 @@
 ---
 name: "Akhil P. Dharmajan"
 role: "Novelist · New voices"
-photo: akhil-p-dharmajan.jpg
+photo: "7_Akhil P..webp"
 categories: [literature]
 order: 70
 featured: true

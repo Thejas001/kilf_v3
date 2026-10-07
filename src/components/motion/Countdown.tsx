@@ -1,3 +1,5 @@
+'use client';
+
 import { useEffect, useState } from 'react';
 import { AnimatePresence, m, useReducedMotion } from 'motion/react';
 import { MotionRoot, calm } from './shared';

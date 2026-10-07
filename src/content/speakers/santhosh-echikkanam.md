@@ -1,7 +1,7 @@
 ---
 name: "Santhosh Echikkanam"
 role: "Writer · Screenwriter"
-photo: santhosh-echikkanam.jpg
+photo: "6_Santhosh Echikkanam.webp"
 categories: [literature, cinema]
 order: 60
 featured: true

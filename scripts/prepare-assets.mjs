@@ -1,17 +1,18 @@
-// Runs before `astro dev` and `astro build`.
-// 1. Rasterises the stand-in illustrations in src/placeholders/*.svg, so the
-//    image pipeline (AVIF/WebP via <Picture>) works before the real artwork
-//    lands in kilf-assets/. Real files in kilf-assets/ always win.
+// Runs before `next dev` and `next build`.
+// 1. Rasterises the stand-in illustrations in src/placeholders/*.svg, so
+//    there's always something to show before the real artwork lands in
+//    public/kilf-assets/. Real files in public/kilf-assets/ always win.
 // 2. Makes a blue duotone initials placeholder for any speaker whose photo
-//    is missing from kilf-assets/speakers/.
+//    is missing from public/kilf-assets/speakers/.
 // 3. Builds the 1200×630 Open Graph share image from the cover illustration.
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
 
-const root = path.resolve(new URL('..', import.meta.url).pathname);
-const out = path.join(root, 'src/assets/generated');
-const assetsDir = path.join(root, 'kilf-assets');
+const root = path.resolve(fileURLToPath(new URL('..', import.meta.url)));
+const out = path.join(root, 'public/generated');
+const assetsDir = path.join(root, 'public/kilf-assets');
 const exists = (p) => fs.access(p).then(() => true, () => false);
 
 async function findReal(dir, stem) {

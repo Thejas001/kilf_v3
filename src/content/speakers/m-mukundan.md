@@ -1,7 +1,7 @@
 ---
 name: "M. Mukundan"
 role: "Writer · Malayalam literature"
-photo: m-mukundan.jpg
+photo: "1_m_mukundan.webp"
 categories: [literature]
 order: 10
 featured: true

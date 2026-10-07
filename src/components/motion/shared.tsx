@@ -1,3 +1,5 @@
+'use client';
+
 import { useEffect, useRef, useState, type ReactNode, type RefObject } from 'react';
 import { LazyMotion, domAnimation, useInView, useReducedMotion } from 'motion/react';
 

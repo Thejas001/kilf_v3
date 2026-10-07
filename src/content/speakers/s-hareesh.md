@@ -1,7 +1,7 @@
 ---
 name: "S. Hareesh"
 role: "Novelist · Malayalam literature"
-photo: s-hareesh.jpg
+photo: "5_S. Hareesh Novelist ·.webp"
 categories: [literature]
 order: 50
 featured: true

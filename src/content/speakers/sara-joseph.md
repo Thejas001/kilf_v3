@@ -1,7 +1,7 @@
 ---
 name: "Sara Joseph"
 role: "Novelist · Malayalam literature"
-photo: sara-joseph.jpg
+photo: "3_Sara Joseph Novelist.webp"
 categories: [literature]
 order: 30
 featured: true

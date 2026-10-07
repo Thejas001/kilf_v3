@@ -1,7 +1,7 @@
 ---
 name: "Sri M"
 role: "Spiritual teacher · Author"
-photo: sri-m.jpg
+photo: "8_Sri M.webp"
 categories: [history-ideas]
 order: 80
 featured: true

@@ -1,7 +1,7 @@
 ---
 name: "M. G. Sasibhooshan"
 role: "Art historian · Cultural heritage"
-photo: m-g-sasibhooshan.jpg
+photo: "12_M. G. Sasibhooshan.webp"
 categories: [history-ideas]
 order: 120
 featured: true

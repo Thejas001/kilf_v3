@@ -1,7 +1,7 @@
 ---
 name: "Manu S. Pillai"
 role: "Historian · Author"
-photo: manu-s-pillai.jpg
+photo: "9_Manu S. Pillai.webp"
 categories: [history-ideas]
 order: 90
 featured: true

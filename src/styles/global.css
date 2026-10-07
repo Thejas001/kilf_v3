@@ -316,3 +316,419 @@ html[data-motion='paused'] *::after {
   .js [data-reveal],
   .js [data-reveal-group] > * { opacity: 1; }
 }
+
+/* Schedule (src/components/blocks/Schedule.tsx): kept in this global
+   stylesheet, not a scoped <style jsx>, because Schedule stays a Server
+   Component (it loads schedule/speaker data straight off disk) and
+   styled-jsx requires a Client Component. */
+.day-tab[aria-selected='true'] {
+  background: var(--color-navy);
+  color: #fff;
+  --tw-ring-color: var(--color-navy);
+}
+.chip {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  gap: 0.5rem;
+  padding-inline: 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-navy);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--color-navy) 20%, transparent);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+.chip:hover {
+  background: color-mix(in oklab, var(--color-navy) 6%, transparent);
+}
+.chip[aria-pressed='true'] {
+  background: var(--color-navy);
+  color: #fff;
+}
+/* The must-sees stand out: a coral rule down the left, a hint of sky. */
+.session.is-pick {
+  position: relative;
+  background: linear-gradient(90deg, color-mix(in oklab, var(--color-sky) 80%, transparent), transparent 70%);
+  box-shadow: inset 3px 0 0 var(--color-coral);
+  padding-inline-start: 1.25rem;
+}
+@media (min-width: 640px) {
+  .session.is-pick {
+    padding-inline-start: 1.5rem;
+  }
+}
+.day-panel:not([hidden]) {
+  animation: day-in 0.6s var(--ease-calm) both;
+}
+@keyframes day-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .day-panel:not([hidden]) {
+    animation: none;
+  }
+}
+
+/* StrandGrid (src/components/blocks/StrandGrid.tsx): same reason as above
+   — StrandGrid loads strand data off disk and must stay a Server Component. */
+.strand {
+  transition: background-color 0.5s var(--ease-calm);
+}
+.strand:hover {
+  background: color-mix(in oklab, var(--color-sky) 70%, transparent);
+}
+
+/* KhasakBook (src/components/art/KhasakBook.tsx): same reason as above —
+   KhasakBook renders <Illustration>, which resolves its file off disk, so it
+   must stay a Server Component. Selectors are scoped under [data-book]
+   (the component's own root) since this is now plain global CSS rather than
+   styled-jsx's auto-namespaced scoping. */
+[data-book] {
+  /* The spread is the box; one page is half of it. Sizes use its width (cqw). */
+  --travel: 1;
+  position: relative;
+  aspect-ratio: 2 / 1.42;
+  container-type: inline-size;
+  perspective: 2600px;
+}
+/* Phones: the right-hand page is centred and large; the cover swings out to the left. */
+@media (max-width: 1023px) {
+  [data-book] {
+    --travel: 0;
+    --pw: min(72vw, 21rem);
+    width: calc(2 * var(--pw));
+    margin-left: calc(50% - 1.5 * var(--pw));
+  }
+}
+@media (min-width: 1024px) {
+  [data-book] {
+    width: min(100%, calc((100svh - 14rem) * 2 / 1.42));
+    margin-inline: auto;
+  }
+}
+[data-book] .book-3d {
+  /* Closed, the cover sits centred; open, the spread does. */
+  --s: clamp(0, calc((var(--p, 1) - 0.06) / 0.5), 1);
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transform: translateX(calc((1 - var(--s)) * -25% * var(--travel))) rotateX(calc(14deg - var(--s) * 6deg));
+}
+[data-book] .page,
+[data-book] .leaf {
+  position: absolute;
+  top: 1.2%;
+  left: 50%;
+  width: 48.8%;
+  height: 97.6%;
+}
+[data-book] .page-right {
+  display: flex;
+  flex-direction: column;
+  padding: 3.2cqw 3cqw 2.4cqw;
+  background: linear-gradient(90deg, #e9e2cc 0%, #fbf8ee 7%, #fffdf4 60%, #f6f1e2 100%);
+  box-shadow:
+    1px 0 0 #e7dfc8,
+    3px 0 0 #fffdf4,
+    4px 0 0 #e2d9c0,
+    6px 0 0 #fbf8ee,
+    7px 0 0 #ddd3b8;
+}
+[data-book] .plate {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+  background: #0a1250;
+}
+/* The stage lights up once the book is open. */
+[data-book] .plate-light {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 60% 38% at 46% 88%, rgb(255 227 216 / 0.55), transparent 70%),
+    linear-gradient(180deg, rgb(255 227 216 / 0.28), transparent 60%);
+  mix-blend-mode: screen;
+  opacity: clamp(0, calc((var(--p, 1) - 0.62) / 0.3), 1);
+}
+[data-book] .plate-caption {
+  margin-top: 1.6cqw;
+  font-size: 1.35cqw;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #4b5573;
+  text-align: center;
+}
+[data-book] .leaf {
+  transform-origin: left center;
+  transform-style: preserve-3d;
+  /* Each turns a moment after the one above it, then lies on the left. */
+  --start: calc(0.06 + var(--i) * 0.09);
+  --t: clamp(0, calc((var(--p, 1) - var(--start)) / 0.44), 1);
+  --e: calc(var(--t) * var(--t) * (3 - 2 * var(--t)));
+  transform: rotateY(calc(var(--e) * -180deg)) translateZ(calc((4 - var(--i)) * 1px));
+}
+[data-book] .face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  background: #fffdf4;
+}
+[data-book] .face-back {
+  transform: rotateY(180deg);
+}
+/* Blank pages suggest lines of text. */
+[data-book] .lines {
+  background:
+    linear-gradient(90deg, rgb(16 27 70 / 0.05), transparent 12%),
+    repeating-linear-gradient(180deg, transparent 0 1.25cqw, rgb(16 27 70 / 0.09) 1.25cqw 1.42cqw) 3.4cqw 4.4cqw / calc(100% - 6.8cqw) calc(100% - 8.8cqw) no-repeat,
+    #fcf9ef;
+}
+[data-book] .face-back.lines {
+  background:
+    linear-gradient(270deg, rgb(16 27 70 / 0.06), transparent 12%),
+    repeating-linear-gradient(180deg, transparent 0 1.25cqw, rgb(16 27 70 / 0.09) 1.25cqw 1.42cqw) 3.4cqw 4.4cqw / calc(100% - 6.8cqw) calc(100% - 8.8cqw) no-repeat,
+    #fcf9ef;
+}
+[data-book] .title-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4cqw;
+  text-align: center;
+  color: var(--color-navy);
+  background: linear-gradient(270deg, rgb(16 27 70 / 0.07), transparent 14%), #fffdf4;
+}
+[data-book] .tp-kicker {
+  font-size: 1.3cqw;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #a3391f;
+}
+[data-book] .tp-ml {
+  margin-top: 2.6cqw;
+  font-family: var(--font-ml, 'Anek Malayalam'), sans-serif;
+  font-size: 4.6cqw;
+  font-weight: 700;
+  line-height: 1.15;
+}
+[data-book] .tp-en {
+  margin-top: 1.4cqw;
+  font-family: var(--font-display);
+  font-size: 2.2cqw;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+[data-book] .tp-rule {
+  display: block;
+  width: 6cqw;
+  height: 2px;
+  margin: 2.6cqw auto;
+  background: #ff8870;
+}
+[data-book] .tp-staged {
+  font-size: 1.55cqw;
+  line-height: 1.5;
+  color: #4b5573;
+}
+[data-book] .cover {
+  top: 0;
+  height: 100%;
+  width: 50%;
+}
+[data-book] .cover-front {
+  padding: 2.2cqw;
+  background:
+    linear-gradient(90deg, rgb(0 0 0 / 0.35), rgb(255 255 255 / 0.06) 3%, transparent 7%),
+    radial-gradient(ellipse at 70% 20%, rgb(255 255 255 / 0.08), transparent 60%),
+    linear-gradient(160deg, #1b3a9e, #152f81 45%, #0e1d5c);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.06);
+}
+[data-book] .cover-frame {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  align-items: center;
+  padding: 3.2cqw 2.4cqw 2.4cqw;
+  text-align: center;
+  color: #f7cf97;
+  border: 1px solid rgb(247 207 151 / 0.55);
+  outline: 1px solid rgb(247 207 151 / 0.25);
+  outline-offset: -0.9cqw;
+}
+[data-book] .cv-author {
+  font-size: 1.35cqw;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+}
+[data-book] .cv-emblem {
+  width: 16cqw;
+  margin-top: 3cqw;
+}
+[data-book] .cv-ml {
+  margin-top: auto;
+  font-family: var(--font-ml, 'Anek Malayalam'), sans-serif;
+  font-size: 5cqw;
+  font-weight: 700;
+  line-height: 1.12;
+  color: #fbe2bd;
+}
+[data-book] .cv-en {
+  margin-top: 1.2cqw;
+  font-family: var(--font-display);
+  font-size: 1.9cqw;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+[data-book] .cv-foot {
+  margin-top: 3cqw;
+  font-size: 1.1cqw;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgb(247 207 151 / 0.7);
+}
+/* Inside the cover: a patterned endpaper, as in a cloth-bound book. */
+[data-book] .endpaper {
+  background:
+    linear-gradient(270deg, rgb(0 0 0 / 0.3), transparent 8%),
+    repeating-linear-gradient(45deg, rgb(247 207 151 / 0.1) 0 0.35cqw, transparent 0.35cqw 1.6cqw),
+    repeating-linear-gradient(-45deg, rgb(247 207 151 / 0.1) 0 0.35cqw, transparent 0.35cqw 1.6cqw),
+    #152f81;
+}
+[data-book] .book-shadow {
+  position: absolute;
+  left: 6%;
+  right: 6%;
+  bottom: -6%;
+  height: 12%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgb(0 0 0 / 0.55), transparent 70%);
+  filter: blur(6px);
+  transform: translateX(calc((1 - clamp(0, calc((var(--p, 1) - 0.06) / 0.5), 1)) * -12% * var(--travel))) scaleX(calc(0.55 + clamp(0, calc((var(--p, 1) - 0.06) / 0.5), 1) * 0.45));
+}
+
+/* Home (src/views/Home.tsx): same reason as above — Home loads speaker and
+   strand data off disk and must stay a Server Component. */
+.hero-art {
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 24%);
+  mask-image: linear-gradient(to bottom, transparent 0%, #000 24%);
+}
+@media (min-width: 1024px) {
+  .hero-art {
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+  /* Morning mist over the lake: keeps the words legible, lets the water show */
+  .hero-mist {
+    background:
+      linear-gradient(180deg, rgb(255 253 244 / 0.85) 0%, rgb(255 253 244 / 0) 22%),
+      radial-gradient(ellipse 60% 76% at 16% 54%, rgb(255 253 244 / 0.92) 0%, rgb(255 253 244 / 0.72) 44%, rgb(255 253 244 / 0) 78%);
+  }
+}
+/* Khasakkinte Ithihasam: a dark stage between two curtains, lit as the book opens */
+.khasak {
+  background:
+    radial-gradient(ellipse 45% 55% at 32% 48%, rgb(255 170 140 / 0.14), transparent 72%),
+    #130c14;
+}
+.khasak[data-scrolly] {
+  height: 230vh;
+}
+.khasak[data-scrolly] .khasak-sticky {
+  position: sticky;
+  top: var(--hh);
+  display: flex;
+  min-height: calc(100svh - var(--hh));
+  align-items: center;
+}
+.khasak[data-scrolly] .khasak-hint {
+  display: block;
+  opacity: calc(1 - clamp(0, calc(var(--p, 1) * 6), 1));
+}
+.khasak-curtain {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: clamp(1.25rem, 7vw, 7rem);
+  pointer-events: none;
+  background: repeating-linear-gradient(90deg, #5a1a10 0 14px, #3a0f0a 14px 30px, #4d160d 30px 38px);
+}
+.khasak-curtain-l {
+  left: 0;
+  -webkit-mask-image: linear-gradient(90deg, #000 30%, transparent);
+  mask-image: linear-gradient(90deg, #000 30%, transparent);
+}
+.khasak-curtain-r {
+  right: 0;
+  -webkit-mask-image: linear-gradient(270deg, #000 30%, transparent);
+  mask-image: linear-gradient(270deg, #000 30%, transparent);
+}
+/* The spotlight: the cone is clipped inside, and the blur on the outside softens its edges. */
+.khasak-beam {
+  position: absolute;
+  left: 6%;
+  right: 6%;
+  top: -22%;
+  bottom: 6%;
+  pointer-events: none;
+  filter: blur(26px);
+  opacity: calc(0.15 + 0.85 * clamp(0, calc((var(--p, 1) - 0.45) / 0.35), 1));
+}
+.khasak-beam::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgb(255 227 216 / 0.3), rgb(255 227 216 / 0.06) 75%, transparent);
+  clip-path: polygon(40% 0, 60% 0, 100% 100%, 0 100%);
+}
+/* New Year's Eve: a violet glow behind the night graphic */
+.nye-glow {
+  background:
+    radial-gradient(ellipse 55% 60% at 80% 42%, rgb(75 44 136 / 0.6), transparent 72%),
+    radial-gradient(ellipse 45% 40% at 8% 96%, rgb(36 71 237 / 0.28), transparent 70%);
+}
+/* The picture settles, like a camera coming to rest */
+.art-settle {
+  animation: settle 2.6s var(--ease-calm) both;
+}
+@keyframes settle {
+  from {
+    transform: scale(1.06);
+  }
+  to {
+    transform: none;
+  }
+}
+.turn {
+  display: inline-block;
+  animation: bob 2.6s ease-in-out infinite;
+}
+.arrow {
+  display: inline-block;
+  animation: drift 3.2s ease-in-out infinite;
+}
+@keyframes bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(4px);
+  }
+}
+@keyframes drift {
+  0%,
+  100% {
+    transform: translateX(-4px);
+  }
+  50% {
+    transform: translateX(6px);
+  }
+}

@@ -1,7 +1,7 @@
 ---
 name: "Santhosh George Kulangara"
 role: "Traveller · Media storyteller"
-photo: santhosh-george-kulangara.jpg
+photo: "10_Santhosh George Kulangara.webp"
 categories: [history-ideas]
 order: 100
 featured: true

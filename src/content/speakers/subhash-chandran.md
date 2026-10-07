@@ -1,7 +1,7 @@
 ---
 name: "Subhash Chandran"
 role: "Novelist · Malayalam literature"
-photo: subhash-chandran.jpg
+photo: "4_Subhash Chandran Novelist.webp"
 categories: [literature]
 order: 40
 featured: true

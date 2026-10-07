@@ -1,7 +1,7 @@
 ---
 name: "Ouseppachan"
 role: "Music director · Film music"
-photo: ouseppachan.jpg
+photo: "13_Ouseppachan.webp"
 categories: [music, cinema]
 order: 130
 featured: false

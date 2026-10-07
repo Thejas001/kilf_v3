@@ -1,7 +1,7 @@
 ---
 name: "Shyamaprasad"
 role: "Filmmaker · Cinema"
-photo: shyamaprasad.jpg
+photo: "15_Shyamaprasad.webp"
 categories: [cinema]
 order: 150
 featured: false

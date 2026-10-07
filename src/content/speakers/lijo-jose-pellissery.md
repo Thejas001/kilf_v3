@@ -1,7 +1,7 @@
 ---
 name: "Lijo Jose Pellissery"
 role: "Filmmaker · Cinema"
-photo: lijo-jose-pellissery.jpg
+photo: "16_Lijo Jose pel.webp"
 categories: [cinema]
 order: 160
 featured: false

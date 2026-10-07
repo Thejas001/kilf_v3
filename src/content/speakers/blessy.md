@@ -1,7 +1,7 @@
 ---
 name: "Blessy"
 role: "Film director · Storytelling"
-photo: blessy.jpg
+photo: "14_Blessy Film director ·.webp"
 categories: [cinema]
 order: 140
 featured: false

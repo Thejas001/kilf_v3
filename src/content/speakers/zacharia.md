@@ -1,7 +1,7 @@
 ---
 name: "Zacharia"
 role: "Writer · Malayalam literature"
-photo: zacharia.jpg
+photo: "2_Paul_Zacharia.webp"
 categories: [literature]
 order: 20
 featured: true

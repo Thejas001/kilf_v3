@@ -1,7 +1,7 @@
 ---
 name: "Vijayaraghavan"
 role: "Actor · Cinema"
-photo: vijayaraghavan.jpg
+photo: "17_Vijayaragavan.webp"
 categories: [cinema]
 order: 170
 featured: false

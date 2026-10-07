@@ -2,7 +2,7 @@
 
 Official website for the **Kollam International Literature Festival (KILF) 2027**: 31 December 2026 – 4 January 2027, Kollam, Kerala.
 
-Built with [Astro](https://astro.build) and Tailwind CSS. It is a fully static site: fast, SEO-friendly and hostable anywhere. The calm lake animations run on [Motion](https://motion.dev) (formerly Framer Motion) inside small React islands; everything else is plain HTML with a few tiny scripts (menu, speaker filters, map loader, forms).
+Built with [Next.js](https://nextjs.org) (App Router) and Tailwind CSS. It builds to fully static pages: fast, SEO-friendly and hostable anywhere. The calm lake animations run on [Motion](https://motion.dev) (formerly Framer Motion) inside small React client components; everything else is server-rendered HTML with a few tiny client-side scripts (menu, speaker filters, map loader, forms).
 
 - **English** at `/` (default), **Malayalam** at `/ml/`. Home and About are translated; other `/ml/` pages show the English content with a notice.
 - Content (speakers, FAQs, passes, strands, programme, sponsors) lives in `src/content/` and can be edited without touching code.
@@ -15,16 +15,16 @@ Requires **Node 22.12+**.
 
 ```bash
 npm install
-cp .env.example .env     # optional: fill in the form endpoint etc.
-npm run dev              # http://localhost:4321
+cp .env.example .env.local   # optional: fill in the form endpoint etc.
+npm run dev                 # http://localhost:3000
 ```
 
 | Command | What it does |
 |---|---|
 | `npm run dev` | Local dev server with hot reload. `[PLACEHOLDERS]` are highlighted in yellow. |
-| `npm run build` | Production build into `dist/` (plain static files). |
-| `npm run preview` | Serve the built `dist/` locally. |
-| `npm run check` | Type-check content and components. |
+| `npm run build` | Production build into `.next/` (statically generated where possible). |
+| `npm run start` | Serve the production build locally. |
+| `npm run lint` | Lint content and components. |
 | `npm run assets` | Regenerate stand-in images and the share image (also runs before `dev`/`build`). |
 | `npm run screenshots` | After a build: screenshots of key pages at mobile + desktop into `screenshots/`. |
 
@@ -44,9 +44,9 @@ kilf-assets/
 
 Until a file is present, the site uses an on-brand **stand-in**: flat SVG illustrations in `src/placeholders/`, and initials for speakers. A real file with the same name (any of `.jpg .png .webp .avif`) replaces its stand-in automatically on the next build. Images are resized and served as AVIF/WebP with `<picture>`.
 
-The lake illustrations (`src/assets/art/lake-hero.jpg`, the open book on the jetty, and `lake-jetty.jpg`, the wide jetty scene) are part of the design: the home hero and the About, Visit and Partners pages draw them with live water (see Motion below). Both were upscaled 4× from 1241 px originals with Real-ESRGAN; higher-resolution originals of the same scenes can replace them. If you change their composition, update the water outlines (`mask`) in `src/components/LakeArt.astro`.
+The lake illustrations (`src/assets/art/lake-hero.jpg`, the open book on the jetty, and `lake-jetty.jpg`, the wide jetty scene) are part of the design: the home hero and the About, Visit and Partners pages draw them with live water (see Motion below). Both were upscaled 4× from 1241 px originals with Real-ESRGAN; higher-resolution originals of the same scenes can replace them. If you change their composition, update the water outlines (`mask`) in `src/components/LakeArt.tsx`.
 
-The home hero is full-bleed on desktop (the illustration covers the whole section, with a soft "mist" behind the words) and stacked on phones and tablets (words on the cream sky, the lake below). Its crop at each screen size is set with `object-[…]` classes on the hero's `LakeArt` in `src/views/Home.astro`; the live water follows the same crop automatically.
+The home hero is full-bleed on desktop (the illustration covers the whole section, with a soft "mist" behind the words) and stacked on phones and tablets (words on the cream sky, the lake below). Its crop at each screen size is set with `object-[…]` classes on the hero's `LakeArt` in `src/views/Home.tsx`; the live water follows the same crop automatically.
 
 The 1200×630 social share image (`public/og-image.jpg`) is built on every build from the lake-and-book art (or `kilf-assets/illustrations/cover.jpg`, if present).
 
@@ -132,23 +132,23 @@ Each day has a `theme` ("First light."), a `blurb` and `allDay` lines (book fair
 
 ### Open ticketing
 
-Prices are already in `src/content/passes.json` (`"price"`, with `"priceNote"` saying what it covers). When sales open, add `"buyUrl"` to each pass and the "Notify me" button becomes a "Buy" button. Theatre ticket prices and dates for Khasakkinte Ithihasam are in `src/components/motion/TicketCard.tsx` and `src/views/Khasak.astro`.
+Prices are already in `src/content/passes.json` (`"price"`, with `"priceNote"` saying what it covers). When sales open, add `"buyUrl"` to each pass and the "Notify me" button becomes a "Buy" button. Theatre ticket prices and dates for Khasakkinte Ithihasam are in `src/components/motion/TicketCard.tsx` and `src/views/Khasak.tsx`.
 
 ### Translate another page into Malayalam
 
 1. Move the page's English strings into `src/i18n/ui.ts` (the `en` block) and add the Malayalam strings to the `ml` block, as Home and About do. Use `t('key')` in the view in `src/views/`.
 2. Add the path (e.g. `'/programme'`) to `translatedPaths` in `src/i18n/ui.ts`.
-3. Add the path to the sitemap filter in `astro.config.mjs`.
+3. Add the path to the Malayalam list in `src/app/sitemap.ts`.
 
 Untranslated `/ml/` pages show a notice, are `noindex`, and point their canonical URL at the English page.
 
 ## 4. Forms
 
-Every form (Register, Volunteer, Exhibit, College, Partner enquiry, Contact, newsletter and the "Notify me" banners) sends a JSON POST to **`PUBLIC_FORM_ENDPOINT`**. Each submission carries a `form` field naming the form (`register`, `volunteer`, `exhibit`, `partner`, `contact`, `newsletter`, `programme-notify`, `passes-notify`, `khasak-seats`, `college`) and the `page` it came from.
+Every form (Register, Volunteer, Exhibit, College, Partner enquiry, Contact, newsletter and the "Notify me" banners) sends a JSON POST to **`NEXT_PUBLIC_FORM_ENDPOINT`**. Each submission carries a `form` field naming the form (`register`, `volunteer`, `exhibit`, `partner`, `contact`, `newsletter`, `programme-notify`, `passes-notify`, `khasak-seats`, `college`) and the `page` it came from.
 
-- **Formspree** (simplest): create a form, then set `PUBLIC_FORM_ENDPOINT=https://formspree.io/f/xxxxxxx`.
+- **Formspree** (simplest): create a form, then set `NEXT_PUBLIC_FORM_ENDPOINT=https://formspree.io/f/xxxxxxx`.
 - **Google Sheets**: deploy an Apps Script web app whose `doPost(e)` appends `JSON.parse(e.postData.contents)` to a sheet, then set the endpoint to its `https://script.google.com/macros/s/…/exec` URL. The site sends a CORS-safe request for Apps Script automatically.
-- Optional overrides: `PUBLIC_FORM_ENDPOINT_PARTNER` and `PUBLIC_FORM_ENDPOINT_NEWSLETTER`.
+- Optional overrides: `NEXT_PUBLIC_FORM_ENDPOINT_PARTNER` and `NEXT_PUBLIC_FORM_ENDPOINT_NEWSLETTER`.
 
 Spam protection: a hidden honeypot field (`_gotcha`) and a minimum fill time. Bots see a fake success and nothing is sent. In `npm run dev` with no endpoint set, forms simulate success. In production with no endpoint, forms show an error with the festival email.
 
@@ -159,18 +159,18 @@ See `.env.example`. Set them in Vercel/Netlify under *Settings → Environment v
 | Variable | Purpose |
 |---|---|
 | `SITE_URL` | Public URL, used for canonical links, sitemap, Open Graph and the footer QR code. **Set this once the domain is known.** |
-| `PUBLIC_FORM_ENDPOINT` | Form backend (see above). |
-| `PUBLIC_GA4_ID` *or* `PUBLIC_PLAUSIBLE_DOMAIN` | Analytics. Nothing loads if both are empty. The privacy page adapts automatically. |
-| `PUBLIC_PARTNER_CALL_URL` | Link for "Book a partnership call" (Calendly, Cal.com…). Falls back to an email link. |
-| `PUBLIC_WHATSAPP_URL` | WhatsApp channel/community link; shows a "Join on WhatsApp" button in the signup block. |
+| `NEXT_PUBLIC_FORM_ENDPOINT` | Form backend (see above). |
+| `NEXT_PUBLIC_GA4_ID` *or* `NEXT_PUBLIC_PLAUSIBLE_DOMAIN` | Analytics. Nothing loads if both are empty. The privacy page adapts automatically. |
+| `NEXT_PUBLIC_PARTNER_CALL_URL` | Link for "Book a partnership call" (Calendly, Cal.com…). Falls back to an email link. |
+| `NEXT_PUBLIC_WHATSAPP_URL` | WhatsApp channel/community link; shows a "Join on WhatsApp" button in the signup block. |
 
 ## 6. Deploy
 
-**Vercel**: import the repo. `vercel.json` sets the build (`npm run build`, output `dist`). Add the env variables and deploy.
+**Vercel**: import the repo. `vercel.json` sets the framework to Next.js. Add the env variables and deploy.
 
-**Netlify**: import the repo. `netlify.toml` is included.
+**Netlify**: import the repo. `netlify.toml` uses `@netlify/plugin-nextjs`.
 
-**Any static host**: run `npm run build` and upload `dist/`.
+**Node host**: run `npm run build` then `npm run start`.
 
 The partnership proposal PDF: put it at `public/downloads/kilf-2027-partnership-proposal.pdf` and the Partners page shows a download link.
 
@@ -205,13 +205,13 @@ All animation is calm and water-like, and all of it can be stopped:
 
 | Where | What moves | Component |
 |---|---|---|
-| Home hero; About, Visit and Partners illustrations | The drawn lake comes alive: a small wave simulation bends the illustration's water through WebGL. Drops fall now and then, the cursor leaves a gentle wake, a tap sends out a ring; the jetty, the book and the shore stay still | `src/components/LakeArt.astro`, `src/scripts/lake-water.ts` (plain script, no framework: it is on the first screen), `motion/water.ts` |
+| Home hero; About, Visit and Partners illustrations | The drawn lake comes alive: a small wave simulation bends the illustration's water through WebGL. Drops fall now and then, the cursor leaves a gentle wake, a tap sends out a ring; the jetty, the book and the shore stay still | `src/components/LakeArt.tsx`, `src/scripts/lake-water.ts` (plain script, no framework: it is on the first screen), `motion/water.ts` |
 | Page heroes, statement band, New Year's Eve, theatre and notify bands, footer | Rings widening slowly across still water; a faint ripple trails the mouse | `motion/RippleField.tsx` (Motion) |
-| Home "ways in" blocks | A ring spreads across the block on hover; the music waveform breathes | `blocks/WaysIn.astro` |
+| Home "ways in" blocks | A ring spreads across the block on hover; the music waveform breathes | `blocks/WaysIn.tsx` |
 | Khasakkinte Ithihasam tickets | Ticket type and preview transitions | `motion/TicketCard.tsx` (Motion) |
-| Khasakkinte Ithihasam (home) | A book opens as you scroll: the cover swings open, pages turn, and the spread shows the title page and the stage, lit by a spotlight. On wide screens the section holds still while it opens; with reduced motion it is shown open | `src/components/art/KhasakBook.astro`, script in `src/views/Home.astro` |
-| New Year's Eve (home) | A night graphic: the horizon is a live sound equaliser with palms, the moon a turning record, sound spreads over the water and notes drift up | `src/components/art/NyeMusic.astro` |
-| Home "The festival" and "Youth" | Five paper boats (one per day) bob on the lake; a microphone sends out rings of sound among speech bubbles | `src/components/art/PaperBoats.astro`, `src/components/art/YouthStage.astro` |
+| Khasakkinte Ithihasam (home) | A book opens as you scroll: the cover swings open, pages turn, and the spread shows the title page and the stage, lit by a spotlight. On wide screens the section holds still while it opens; with reduced motion it is shown open | `src/components/art/KhasakBook.tsx`, script in `src/views/Home.tsx` |
+| New Year's Eve (home) | A night graphic: the horizon is a live sound equaliser with palms, the moon a turning record, sound spreads over the water and notes drift up | `src/components/art/NyeMusic.tsx` |
+| Home "The festival" and "Youth" | Five paper boats (one per day) bob on the lake; a microphone sends out rings of sound among speech bubbles | `src/components/art/PaperBoats.tsx`, `src/components/art/YouthStage.tsx` |
 | Strand ribbon (home) | The nine strands drift across the full width; scrolling the page pushes them left (down) or right (up); they ease to a stop on hover | `motion/Marquee.tsx` (Motion) |
 | New Year's Eve | Countdown digits roll as they change | `motion/Countdown.tsx` (Motion) |
 | Everywhere | Sections rise into place as you scroll, numbers count up, buttons send out a ring on hover | `src/scripts/reveal.ts` (Motion), `global.css` |
@@ -226,7 +226,7 @@ All animation is calm and water-like, and all of it can be stopped:
 - Section labels read "01 / THE FESTIVAL" (`ChapterLabel`); headlines are two lines, the second in bright blue (`Headline`).
 - **Gradient text** marks the key words: page-hero accents and a few headlines (`accentStyle="gradient"` on `Headline`, or the `text-grad`, `text-grad-warm` and `text-grad-ink` classes). Each class is tuned for the surface it sits on.
 - Buttons are square. Primary buttons are blue on light surfaces and turn lime on blue or navy bands automatically (`LimeButton` with the default `primary` variant). Secondary actions are underlined text links with a ↗ (`TextLink`).
-- Speaker portraits are 4:5 rounded rectangles (`Portrait.astro`); until a photo arrives, a quiet blue tint with the speaker's initials stands in.
+- Speaker portraits are 4:5 rounded rectangles (`Portrait.tsx`); until a photo arrives, a quiet blue tint with the speaker's initials stands in.
 
 ### Brand notes
 
