@@ -1,4 +1,4 @@
-const api = (process.env.NEXT_PUBLIC_API_URL || '').replace(/\/$/, '');
+const api = (process.env.NEXT_PUBLIC_API_URL || 'https://api.kilf.in').replace(/\/$/, '');
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
