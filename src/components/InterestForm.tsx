@@ -77,8 +77,17 @@ export function InterestForm() {
 
   if (status === 'done') {
     return (
-      <div className="card flex min-h-[320px] items-center justify-center bg-sky p-6 text-center sm:p-9" role="status">
-        <div className="flex flex-col items-center gap-4">
+      <div
+        className="pop-fade fixed inset-0 z-50 flex items-center justify-center bg-navy/60 p-4"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Registration complete"
+        onClick={() => setStatus('idle')}
+      >
+        <div
+          className="pop-in card flex w-full max-w-md flex-col items-center gap-4 bg-sky p-8 text-center sm:p-10"
+          onClick={(e) => e.stopPropagation()}
+        >
           <span className="inline-grid size-12 shrink-0 place-items-center bg-lime text-ink">
             <Icon name="check" size={26} />
           </span>
@@ -86,6 +95,14 @@ export function InterestForm() {
             <p className="font-display text-2xl font-semibold tracking-[-0.03em]">Thank you!</p>
             <p className="mt-1 text-muted">We’ve got your details and will be in touch by email or WhatsApp.</p>
           </div>
+          <button
+            type="button"
+            autoFocus
+            onClick={() => setStatus('idle')}
+            className="mt-2 border border-navy/30 px-5 py-2 text-sm font-semibold text-navy transition-colors hover:bg-white"
+          >
+            Close
+          </button>
         </div>
       </div>
     );
