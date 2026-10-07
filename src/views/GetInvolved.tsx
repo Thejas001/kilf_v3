@@ -29,7 +29,7 @@ export function GetInvolved({ lang }: Props) {
 
   return (
     <>
-      <PageHero chapter={1} label="Join in" text="Be part of" accent="KILF." lead="Five ways into the first chapter. Pick yours: every form takes about a minute.">
+      <PageHero chapter={1} label="Join in" text="Be part of" accent="KILF." lead="Four ways into the first chapter. Pick yours: every form takes about a minute.">
         <nav aria-label="Ways to get involved" className="mt-12">
           <ul className="grid grid-cols-2 border-l border-t border-line sm:grid-cols-3 lg:grid-cols-4">
             {tabs.map(([key, icon, label, href], i) => (
@@ -90,20 +90,14 @@ export function GetInvolved({ lang }: Props) {
 
       <Section tone="cream" labelledby="more-h">
         <h2 id="more-h" className="sr-only">
-          Partner or attend
+          Partner
         </h2>
-        <div className="grid border-l border-t border-line md:grid-cols-2">
+        <div className="grid border-l border-t border-line ">
           <div id="partner" className="on-dark border-b border-r border-line bg-blue p-8 text-white sm:p-12">
             <ChapterLabel n={6} label="Partner" tone="dark" />
             <Headline text="Your brand. Our story." accent="One lake." tone="blue" size="md" className="mt-6" />
             <p className="mt-5 text-white/85">Founding partnerships for the first edition.</p>
             <LimeButton href={lp('/partners')} label="See partnership options" className="mt-8" />
-          </div>
-          <div id="attend" className="border-b border-r border-line bg-lime p-8 text-ink sm:p-12">
-            <ChapterLabel n={7} label="Attend" tone="lime" />
-            <Headline text="Get your" accent="pass." tone="lime" size="md" className="mt-6" />
-            <p className="mt-5 text-ink/80">Day Pass ₹299, Festival Pass ₹499 and Young Reader Pass ₹199, plus theatre tickets for Khasakkinte Ithihasam from ₹1,500. Ticketing opens soon.</p>
-            <LimeButton href={lp('/passes')} label="See passes" className="mt-8" />
           </div>
         </div>
       </Section>

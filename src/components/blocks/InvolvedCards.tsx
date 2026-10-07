@@ -10,7 +10,6 @@ const rows = [
   { key: 'register', href: '/get-involved#register' },
   { key: 'exhibit', href: '/get-involved#exhibit' },
   { key: 'partner', href: '/partners' },
-  { key: 'attend', href: '/passes' },
 ] as const;
 
 export function InvolvedCards({ lang = 'en', tone = 'light' }: Props) {

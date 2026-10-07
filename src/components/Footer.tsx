@@ -2,7 +2,6 @@ import QRCode from 'qrcode';
 import { Logo } from './Logo';
 import { Placeholder } from './Placeholder';
 import { LimeButton } from './LimeButton';
-import { MotionToggle } from './MotionToggle';
 import RippleField from './motion/RippleField';
 import { site, isPlaceholder } from '@/lib/site';
 import { siteUrl } from '@/lib/seo';
@@ -139,7 +138,6 @@ export async function Footer({ lang }: Props) {
             <a href={lp('/privacy')} className="inline-flex min-h-11 items-center hover:text-lime">
               {t('nav.privacy')}
             </a>
-            <MotionToggle lang={lang} />
           </div>
         </div>
       </div>

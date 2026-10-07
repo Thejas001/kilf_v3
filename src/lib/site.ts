@@ -9,8 +9,8 @@ export const site = {
   year: 2027,
   email: 'kilf2027@gmail.com',
   organiser: 'Capital Media',
-  socialHandle: '[@HANDLE]',
-  socialUrl: '', // e.g. https://instagram.com/kilf2027, fill in with the handle
+  socialHandle: 'getanix.com',
+  socialUrl: 'https://getanix.com',
   city: 'Kollam, Kerala',
   datesLabel: '31 December 2026 – 4 January 2027',
   datesShort: '31 Dec 2026 – 4 Jan 2027',
