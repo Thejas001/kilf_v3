@@ -19,12 +19,12 @@ const AGE_GROUPS = ['Under 18', '18-24', '25-34', '35-44', '45-54', '55+'];
 
 const INTERESTS = [
   { value: 'AUTHOR_TALKS', label: 'Author talks' },
+  { value: 'KHASAKKINTE_ITHIHASAM', label: 'Khasakkinte Ithihasam' },
+  { value: 'MUSIC_EVENINGS', label: 'Music evenings' },
   { value: 'BOOK_FAIR', label: 'Book fair' },
-  { value: 'THEATRE', label: 'Theatre' },
-  { value: 'MUSIC', label: 'Music' },
-  { value: 'FILM', label: 'Film' },
+  { value: 'OPEN_MIC_POETRY', label: 'Open mic & poetry' },
+  { value: 'NEW_YEARS_EVE', label: "New Year's Eve" },
   { value: 'WORKSHOPS', label: 'Workshops' },
-  { value: 'YOUTH', label: 'Youth stage' },
 ];
 
 type TypeValue = (typeof TYPES)[number]['value'];
