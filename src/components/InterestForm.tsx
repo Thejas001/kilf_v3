@@ -77,8 +77,8 @@ export function InterestForm() {
 
   if (status === 'done') {
     return (
-      <div className="card bg-sky p-6 sm:p-9" role="status">
-        <div className="flex items-start gap-4">
+      <div className="card flex min-h-[320px] items-center justify-center bg-sky p-6 text-center sm:p-9" role="status">
+        <div className="flex flex-col items-center gap-4">
           <span className="inline-grid size-12 shrink-0 place-items-center bg-lime text-ink">
             <Icon name="check" size={26} />
           </span>
