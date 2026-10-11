@@ -48,36 +48,44 @@ function countUp(el: HTMLElement) {
   );
 }
 
-document.querySelectorAll<HTMLElement>('[data-count]').forEach(countUp);
+let motionBound = false;
 
-if (root.classList.contains('js')) {
-  if (root.dataset.motion === 'paused') {
-    showAll();
-  } else {
-    document.querySelectorAll<HTMLElement>('[data-reveal]').forEach((el) => {
-      inView(
-        el,
-        () => {
-          animate(
-            el,
-            { opacity: [0, 1], transform: ['translateY(28px)', 'none'], filter: ['blur(6px)', 'blur(0px)'] },
-            { duration: 1.1, ease, delay: Number(el.dataset.revealDelay ?? 0) },
-          );
-        },
-        { margin },
-      );
-    });
-    document.querySelectorAll<HTMLElement>('[data-reveal-group]').forEach((group) => {
-      const kids = Array.from(group.children) as HTMLElement[];
-      inView(
-        group,
-        () => {
-          animate(kids, { opacity: [0, 1], transform: ['translateY(24px)', 'none'] }, { duration: 0.9, ease, delay: stagger(0.08) });
-        },
-        { margin },
-      );
-    });
-    // If the visitor pauses motion mid-page, reveal whatever is still hidden.
-    window.addEventListener('kilf:motion', () => root.dataset.motion === 'paused' && showAll());
+/** Wires up the [data-reveal]/[data-count] elements currently in the DOM; call again after each client-side navigation. */
+export function initReveal() {
+  document.querySelectorAll<HTMLElement>('[data-count]').forEach(countUp);
+  
+  if (root.classList.contains('js')) {
+    if (root.dataset.motion === 'paused') {
+      showAll();
+    } else {
+      document.querySelectorAll<HTMLElement>('[data-reveal]').forEach((el) => {
+        inView(
+          el,
+          () => {
+            animate(
+              el,
+              { opacity: [0, 1], transform: ['translateY(28px)', 'none'], filter: ['blur(6px)', 'blur(0px)'] },
+              { duration: 1.1, ease, delay: Number(el.dataset.revealDelay ?? 0) },
+            );
+          },
+          { margin },
+        );
+      });
+      document.querySelectorAll<HTMLElement>('[data-reveal-group]').forEach((group) => {
+        const kids = Array.from(group.children) as HTMLElement[];
+        inView(
+          group,
+          () => {
+            animate(kids, { opacity: [0, 1], transform: ['translateY(24px)', 'none'] }, { duration: 0.9, ease, delay: stagger(0.08) });
+          },
+          { margin },
+        );
+      });
+      // If the visitor pauses motion mid-page, reveal whatever is still hidden.
+      if (!motionBound) {
+      motionBound = true;
+      window.addEventListener('kilf:motion', () => root.dataset.motion === 'paused' && showAll());
+    }
+    }
   }
 }

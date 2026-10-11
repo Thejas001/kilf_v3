@@ -1,3 +1,4 @@
+import { SmartLink } from '@/components/SmartLink';
 import { useTranslations, localizePath, type Lang, type UIKey } from '@/i18n/ui';
 
 /** Five ways in, as a numbered list between hairlines. */
@@ -21,7 +22,7 @@ export function InvolvedCards({ lang = 'en', tone = 'light' }: Props) {
     <ol className={['border-t', dark ? 'border-white/20' : 'border-line'].join(' ')} data-reveal-group>
       {rows.map((r, i) => (
         <li key={r.key} className={['border-b', dark ? 'border-white/20' : 'border-line'].join(' ')}>
-          <a href={lp(r.href)} className="group grid grid-cols-[3rem_1fr_auto] items-baseline gap-x-4 py-7 sm:grid-cols-[4.5rem_1fr_auto] sm:py-9">
+          <SmartLink href={lp(r.href)} className="group grid grid-cols-[3rem_1fr_auto] items-baseline gap-x-4 py-7 sm:grid-cols-[4.5rem_1fr_auto] sm:py-9">
             <span className={['text-sm font-medium tabular-nums', dark ? 'text-white/70' : 'text-navy'].join(' ')} lang="en">
               {String(i + 1).padStart(2, '0')}
             </span>
@@ -47,7 +48,7 @@ export function InvolvedCards({ lang = 'en', tone = 'light' }: Props) {
             >
               ↗
             </span>
-          </a>
+          </SmartLink>
         </li>
       ))}
     </ol>

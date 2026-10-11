@@ -39,18 +39,34 @@ export function HomeScroll() {
       if (khasak && book) {
         const wide = matchMedia('(min-width: 1024px)');
         const still = matchMedia('(prefers-reduced-motion: reduce)');
-        const set = (p: number) => khasak.style.setProperty('--p', p.toFixed(4));
+        // On phones --p lives on the stage (book + beam) only, so each scroll frame restyles
+        // that small subtree instead of the whole section; on desktop the section needs it.
+        const stage = khasak.querySelector<HTMLElement>('[data-khasak-stage]') ?? khasak;
+        let target: HTMLElement = khasak;
+        let last = '';
+        // Skip the write when the value hasn't changed (e.g. while the section is off-screen
+        // and p is pinned at 0 or 1) so no style recalculation is triggered.
+        const set = (p: number) => {
+          const v = p.toFixed(3);
+          if (v === last) return;
+          last = v;
+          target.style.setProperty('--p', v);
+        };
         let stop: VoidFunction | undefined;
         const setup = () => {
           stop?.();
           stop = undefined;
           khasak.removeAttribute('data-scrolly');
           khasak.style.removeProperty('--p');
+          stage.style.removeProperty('--p');
+          last = '';
           if (still.matches) return;
           if (wide.matches) {
+            target = khasak;
             khasak.setAttribute('data-scrolly', '');
             stop = scroll(set, { target: khasak, offset: ['start start', 'end end'] });
           } else {
+            target = stage;
             stop = scroll(set, { target: book, offset: ['start 95%', 'center 50%'] });
           }
         };

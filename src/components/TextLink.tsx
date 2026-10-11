@@ -1,3 +1,4 @@
+import { SmartLink } from '@/components/SmartLink';
 /** Text link with an underline rule and a ↗, as in the print style. */
 interface Props {
   href: string;
@@ -15,11 +16,11 @@ const tones = {
 
 export function TextLink({ href, label, tone = 'light', className = '', arrow = '↗' }: Props) {
   return (
-    <a href={href} className={['text-link group inline-flex min-h-11 items-end gap-2 font-semibold', tones[tone], className].filter(Boolean).join(' ')}>
+    <SmartLink href={href} className={['text-link group inline-flex min-h-11 items-end gap-2 font-semibold', tones[tone], className].filter(Boolean).join(' ')}>
       <span>{label}</span>
       <span aria-hidden="true" className="text-[0.85em] transition-transform duration-500 ease-[var(--ease-calm)] group-hover:-translate-y-0.5 group-hover:translate-x-0.5">
         {arrow}
       </span>
-    </a>
+    </SmartLink>
   );
 }

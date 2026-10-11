@@ -77,7 +77,7 @@ export function Khasak({ lang }: Props) {
               O. V. Vijayan’s legendary 1969 novel, staged by director Deepan Sivaraman. Not a play you watch — a world you walk into.
             </p>
             <div className="hero-in mt-10 flex flex-wrap items-center gap-x-8 gap-y-4" style={{ '--d': '0.26s' } as React.CSSProperties}>
-              <LimeButton href="#tickets" label="Choose your ticket" size="lg" className="min-w-[14rem] justify-between !gap-10" />
+              <LimeButton href="#notify" label="Notify me" size="lg" className="min-w-[14rem] justify-between !gap-10" />
               <TextLink href="#production" label="About the production" />
             </div>
           </div>
@@ -222,6 +222,7 @@ export function Khasak({ lang }: Props) {
       <NotifyBanner
         id="notify"
         formName="khasak-tickets"
+        dummy
         kicker="Booking has not opened"
         text="Be first in line"
         accent="for seats."

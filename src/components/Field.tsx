@@ -2,7 +2,7 @@
 interface Props {
   name: string;
   label: string;
-  type?: 'text' | 'email' | 'tel' | 'textarea' | 'select' | 'url' | 'number';
+  type?: 'text' | 'email' | 'tel' | 'textarea' | 'select' | 'choice' | 'url' | 'number';
   required?: boolean;
   options?: string[];
   autocomplete?: string;
@@ -16,7 +16,7 @@ interface Props {
 }
 
 const control =
-  'mt-1.5 block w-full rounded-none border border-line bg-white px-4 py-3.5 text-base text-navy placeholder:text-muted/70 transition-colors hover:border-navy/40 focus:border-blue focus:outline-none focus:ring-2 focus:ring-blue/20 aria-[invalid=true]:border-coral-ink aria-[invalid=true]:ring-coral-ink/20';
+  'mt-1.5 block w-full rounded-xl border border-line bg-white px-4 py-3 shadow-sm text-base text-navy placeholder:text-muted/70 transition-colors hover:border-navy/40 focus:border-blue focus:outline-none focus:ring-2 focus:ring-blue/20 aria-[invalid=true]:border-coral-ink aria-[invalid=true]:ring-coral-ink/20';
 
 export function Field({
   name,
@@ -35,6 +35,34 @@ export function Field({
 }: Props) {
   const id = `${formId}-${name}`;
   const describedBy = [hint && `${id}-hint`, `${id}-error`].filter(Boolean).join(' ');
+
+  if (type === 'choice') {
+    return (
+      <fieldset className={full ? 'sm:col-span-2' : undefined}>
+        <legend className="text-sm font-semibold text-navy">
+          {label}
+          {required ? (
+            <span className="text-coral-ink" aria-hidden="true">
+              {' '}
+              *
+            </span>
+          ) : (
+            <span className="font-normal text-muted"> (optional)</span>
+          )}
+        </legend>
+        <div className="mt-2 flex flex-wrap gap-2">
+          {options.map((o) => (
+            <label key={o} className="cursor-pointer">
+              <input type="radio" name={name} value={o} required={required} className="peer sr-only" />
+              <span className="inline-flex items-center rounded-full border border-navy/15 bg-white px-4 py-2 text-[0.9rem] font-medium text-navy shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-blue/50 peer-focus-visible:ring-2 peer-focus-visible:ring-blue/40 peer-checked:border-blue peer-checked:bg-blue peer-checked:text-white peer-checked:shadow-lg">
+                {o}
+              </span>
+            </label>
+          ))}
+        </div>
+      </fieldset>
+    );
+  }
 
   return (
     <div className={full ? 'sm:col-span-2' : undefined}>

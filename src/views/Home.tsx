@@ -85,12 +85,6 @@ export function Home({ lang }: Props) {
             </p>
           </div>
         </div>
-
-        <div className="container-kilf pointer-events-none absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 pb-4 sm:pb-7">
-          <a href="#festival" className="eyebrow pointer-events-auto inline-flex min-h-11 items-center gap-2 bg-cream/85 px-3 backdrop-blur-sm hover:text-blue-bright sm:bg-transparent sm:px-0 sm:backdrop-blur-none">
-            {t('home.hero.turn')} <span aria-hidden="true" className="turn">↓</span>
-          </a>
-        </div>
       </section>
 
       {/* The nine strands, drifting across the full width of the coral band */}
@@ -228,7 +222,7 @@ export function Home({ lang }: Props) {
         <div className="khasak-curtain khasak-curtain-r" aria-hidden="true"></div>
         <div className="khasak-sticky">
           <div className="container-kilf relative grid w-full items-center gap-14 py-20 sm:py-24 lg:grid-cols-12 lg:gap-12 lg:py-10">
-            <div className="relative order-2 lg:order-1 lg:col-span-7">
+            <div className="relative order-2 lg:order-1 lg:col-span-7" data-khasak-stage>
               <div className="khasak-beam" aria-hidden="true"></div>
               <KhasakBook novel={t('home.khasak.novel')} staged={t('home.khasak.staged')} when={`${t('home.khasak.where')} · ${t('home.khasak.when')} 2027`} />
               <p className="khasak-hint eyebrow mt-10 hidden text-center text-white/70" aria-hidden="true">
@@ -258,8 +252,7 @@ export function Home({ lang }: Props) {
                 {t('home.khasak.quote')}
               </blockquote>
               <div className="mt-9 flex flex-wrap items-center gap-x-8 gap-y-4">
-                <LimeButton href={lp('/khasak#tickets')} label={t('home.khasak.tickets')} size="lg" />
-                <TextLink href={lp('/khasak')} label={t('cta.learnMore')} tone="dark" />
+                <LimeButton href={lp('/khasak#notify')} label={t('cta.notify')} size="lg" />
               </div>
               <p className="mt-4 max-w-md text-sm text-white/65">{t('home.khasak.bundle')}</p>
             </div>

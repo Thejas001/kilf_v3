@@ -6,11 +6,9 @@ import { Headline } from '@/components/Headline';
 import { Icon } from '@/components/Icon';
 import { LakeArt } from '@/components/LakeArt';
 import { LimeButton } from '@/components/LimeButton';
-import { TextLink } from '@/components/TextLink';
 import { Logo } from '@/components/Logo';
 import { Form } from '@/components/Form';
 import { Field } from '@/components/Field';
-import { Placeholder } from '@/components/Placeholder';
 import data from '@/data/partnership.json';
 import { site, env } from '@/lib/site';
 import { logoUrl } from '@/lib/images';
@@ -30,7 +28,6 @@ const steps: [string, string][] = [
 export function Partners({ lang }: Props) {
   const proposalFile = 'downloads/kilf-2027-partnership-proposal.pdf';
   const hasProposal = fs.existsSync(path.join(process.cwd(), 'public', proposalFile));
-  const callUrl = env.partnerCallUrl || `mailto:${site.email}?subject=${encodeURIComponent('KILF 2027 partnership call')}`;
   const logoFileWhite = logoUrl('kilf-logo-white');
   const logoFileBlue = logoUrl('kilf-logo');
 
@@ -51,7 +48,6 @@ export function Partners({ lang }: Props) {
           </div>
           <div className="hero-in mt-10 flex flex-wrap items-center gap-x-8 gap-y-4" style={{ '--d': '0.24s' } as React.CSSProperties}>
             <LimeButton href="#enquire" label="Enquire now" variant="lime" size="lg" className="min-w-[12rem] justify-between !gap-10" />
-            <TextLink href={callUrl} label="Book a partnership call" tone="dark" />
           </div>
         </div>
         <div className="container-kilf relative pb-14 sm:pb-20">
@@ -102,7 +98,7 @@ export function Partners({ lang }: Props) {
             <div className="on-dark relative aspect-[16/9] bg-footer p-5 text-white sm:p-7">
               <div className="flex h-full flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <Logo tone="dark" className="h-8 sm:h-10" src={logoFileWhite} />
+                  <Logo tone="dark" className="h-16 sm:h-20" src={logoFileWhite} />
                   <span className="border border-dashed border-lime/70 px-3 py-1.5 text-xs font-bold uppercase tracking-widest text-lime sm:text-sm">Your logo</span>
                 </div>
                 <p className="display text-2xl sm:text-4xl">
@@ -117,7 +113,7 @@ export function Partners({ lang }: Props) {
           <figure className="flex flex-col border border-line">
             <div className="grid aspect-[16/9] flex-1 place-items-center bg-sky p-5 lg:aspect-auto">
               <div className="w-40 rotate-[-4deg] bg-cream p-4 shadow-[0_18px_40px_-20px_rgb(15_28_116/0.5)] ring-1 ring-line">
-                <Logo className="h-7 text-blue" src={logoFileBlue} />
+                <Logo className="h-14" src={logoFileBlue} />
                 <p className="mt-3 font-display text-lg font-semibold leading-none tracking-[-0.02em]">
                   Festival
                   <br />
@@ -244,16 +240,11 @@ export function Partners({ lang }: Props) {
             <Headline id="enquire-h" text="Let’s write this" accent="together." className="mt-6" />
             <p className="mt-6 max-w-md text-lg leading-relaxed text-navy/80">Tell us a little about your brand and we’ll share the full proposal and tailored options.</p>
             <div className="mt-9 flex flex-col items-start gap-4">
-              <LimeButton href={callUrl} label="Book a partnership call" external={!!env.partnerCallUrl} />
               {hasProposal ? (
                 <a href={`/${proposalFile}`} download className="inline-flex min-h-11 items-center gap-2 font-semibold text-navy underline decoration-1 underline-offset-4 hover:text-blue">
                   <Icon name="download" size={20} /> Download the partnership proposal (PDF)
                 </a>
-              ) : (
-                <p className="inline-flex items-center gap-2 text-sm text-muted">
-                  <Icon name="download" size={20} /> Proposal PDF: <Placeholder value="[PROPOSAL PDF]" />
-                </p>
-              )}
+              ) : null}
               <a href={`mailto:${site.email}`} className="inline-flex min-h-11 items-center gap-2 font-semibold text-navy hover:text-blue">
                 <Icon name="mail" size={20} className="text-blue-bright" />
                 {site.email}
@@ -263,16 +254,17 @@ export function Partners({ lang }: Props) {
           <Form
             id="partner-form"
             name="partner"
+            enquiryApi
             lang={lang}
             endpoint={env.formEndpointPartner || env.formEndpoint}
-            className="border border-navy/10 bg-cream p-6 sm:p-9"
+            className="rounded-[1.75rem] border border-white/70 bg-cream p-6 shadow-[0_30px_80px_-30px_rgba(15,28,116,0.35)] ring-1 ring-ink/5 sm:p-8"
             successText="Thank you. Our partnerships team will be in touch shortly."
           >
             <Field formId="partner-form" name="name" label="Name" autocomplete="name" required />
             <Field formId="partner-form" name="email" type="email" label="Work email" autocomplete="email" required />
             <Field formId="partner-form" name="phone" type="tel" label="Phone" autocomplete="tel" inputmode="tel" required />
             <Field formId="partner-form" name="organisation" label="Company / brand" autocomplete="organization" required />
-            <Field formId="partner-form" name="tier" type="select" label="Interested in" options={[...data.tiers.map((t) => t.name), 'Not sure yet']} full />
+            <Field formId="partner-form" name="tier" type="choice" label="Interested in" options={[...data.tiers.map((t) => t.name), 'Not sure yet']} full />
             <Field formId="partner-form" name="message" type="textarea" label="Message" full rows={4} />
           </Form>
         </div>

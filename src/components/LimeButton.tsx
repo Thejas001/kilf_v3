@@ -1,3 +1,4 @@
+import { SmartLink } from '@/components/SmartLink';
 import type { AnchorHTMLAttributes, ButtonHTMLAttributes } from 'react';
 
 /**
@@ -46,11 +47,11 @@ export function LimeButton({ href, label, type = 'button', variant = 'primary', 
   if (href) {
     const ext = external ? { target: '_blank', rel: 'noopener' } : {};
     return (
-      <a href={href} className={classes} {...ext} {...(rest as AnchorHTMLAttributes<HTMLAnchorElement>)}>
+      <SmartLink href={href} className={classes} {...ext} {...(rest as AnchorHTMLAttributes<HTMLAnchorElement>)}>
         <span>{label}</span>
         {arrowSpan}
         {external && <span className="sr-only">(opens in a new tab)</span>}
-      </a>
+      </SmartLink>
     );
   }
   return (

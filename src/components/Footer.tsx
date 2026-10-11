@@ -1,4 +1,5 @@
 import QRCode from 'qrcode';
+import { SmartLink } from '@/components/SmartLink';
 import { Logo } from './Logo';
 import { Placeholder } from './Placeholder';
 import { LimeButton } from './LimeButton';
@@ -70,10 +71,10 @@ export async function Footer({ lang }: Props) {
 
         <div className="grid gap-12 border-t border-white/15 py-14 sm:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1.25fr] lg:gap-10">
           <div>
-            <a href={lp('/')} className="inline-flex min-h-11 items-center text-white">
-              <Logo tone="dark" className="h-12" decorative src={logoFile} />
+            <SmartLink href={lp('/')} className="inline-flex min-h-11 items-center text-white">
+              <Logo tone="dark" className="h-28" decorative src={logoFile} />
               <span className="sr-only">KILF 2027 — {t('nav.home')}</span>
-            </a>
+            </SmartLink>
             <ul className="mt-6 space-y-1.5 text-[0.95rem] text-white/85">
               <li>{t('site.dates')}</li>
               <li>
@@ -88,9 +89,9 @@ export async function Footer({ lang }: Props) {
               <ul className="mt-4">
                 {col.links.map(([href, label]) => (
                   <li key={href}>
-                    <a href={lp(href)} className="inline-flex min-h-10 items-center text-[0.97rem] text-white/90 transition-colors hover:text-lime">
+                    <SmartLink href={lp(href)} className="inline-flex min-h-10 items-center text-[0.97rem] text-white/90 transition-colors hover:text-lime">
                       {label}
-                    </a>
+                    </SmartLink>
                   </li>
                 ))}
               </ul>
@@ -117,9 +118,9 @@ export async function Footer({ lang }: Props) {
                 )}
               </li>
               <li>
-                <a href={lp('/contact')} className="inline-flex min-h-10 items-center text-white/90 hover:text-lime">
+                <SmartLink href={lp('/contact')} className="inline-flex min-h-10 items-center text-white/90 hover:text-lime">
                   {t('nav.contact')}
-                </a>
+                </SmartLink>
               </li>
             </ul>
             <figure className="mt-5 flex items-center gap-4">
@@ -135,9 +136,9 @@ export async function Footer({ lang }: Props) {
             <p>
               © 2027 {site.shortName}. {t('footer.rights')}
             </p>
-            <a href={lp('/privacy')} className="inline-flex min-h-11 items-center hover:text-lime">
+            <SmartLink href={lp('/privacy')} className="inline-flex min-h-11 items-center hover:text-lime">
               {t('nav.privacy')}
-            </a>
+            </SmartLink>
           </div>
         </div>
       </div>

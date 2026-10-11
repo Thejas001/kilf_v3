@@ -3,9 +3,7 @@
 import { useEffect, useRef, type ReactNode } from 'react';
 import { usePathname } from 'next/navigation';
 import { site, env } from '@/lib/site';
-import { useTranslations, type Lang } from '@/i18n/ui';
-import { LimeButton } from './LimeButton';
-import { Icon } from './Icon';
+import { useTranslations, localizePath, type Lang } from '@/i18n/ui';
 
 /**
  * Static-hosting form. POSTs JSON to PUBLIC_FORM_ENDPOINT (Formspree,
@@ -24,10 +22,17 @@ interface Props {
   successText?: string;
   tone?: 'light' | 'dark';
   grid?: boolean;
+  /** Demo mode: skip the network, play a thank-you animation, then go to the landing page. */
+  dummy?: boolean;
+  /** Post to the backend's public enquiries API (/api/enquiries) instead of the generic form endpoint. */
+  enquiryApi?: boolean;
   children?: ReactNode;
 }
 
+/** Browser calls go through the /backend rewrite (next.config.mjs), like bookings. */
+const ENQUIRY_ENDPOINT = '/backend/api/enquiries';
 const MIN_FILL_MS = 2500;
+const REDIRECT_MS = 3000;
 
 export function Form({
   id,
@@ -40,6 +45,8 @@ export function Form({
   successText,
   tone = 'light',
   grid = true,
+  dummy = false,
+  enquiryApi = false,
   children,
 }: Props) {
   const t = useTranslations(lang);
@@ -56,10 +63,9 @@ export function Form({
 
     const started = Date.now();
     const fields = form.querySelector<HTMLElement>('[data-fields]');
-    const success = form.querySelector<HTMLElement>('[data-success]');
     const errorBox = form.querySelector<HTMLElement>('[data-form-error]');
     const submit = form.querySelector<HTMLButtonElement>('[data-submit]');
-    if (!fields || !success || !errorBox || !submit) return undefined;
+    if (!fields || !errorBox || !submit) return undefined;
     const submitText = submit.querySelector('span');
     if (!submitText) return undefined;
     const originalLabel = submitText.textContent;
@@ -99,15 +105,65 @@ export function Form({
         invalid[0].focus();
         return;
       }
-      const data = Object.fromEntries(new FormData(form).entries()) as Record<string, unknown>;
-      const done = () => {
-        fields.classList.add('hidden');
-        success.classList.remove('hidden');
-        success.focus();
+      const showThanks = () => {
+        form.querySelector<HTMLElement>('[data-thanks]')?.classList.remove('hidden');
+        setTimeout(() => window.location.assign(localizePath('/', lang)), REDIRECT_MS);
       };
+      if (dummy) return showThanks();
+      const data = Object.fromEntries(new FormData(form).entries()) as Record<string, unknown>;
+      const done = showThanks;
       // Bots: filled honeypot or inhumanly fast → pretend success, send nothing.
       if (data._gotcha || Date.now() - started < MIN_FILL_MS) return done();
       delete data._gotcha;
+
+      if (enquiryApi) {
+        const text = (k: string) => String(data[k] ?? '').trim();
+        const payload = {
+          name: text('name'),
+          email: text('email'),
+          phone: text('phone'),
+          organisation: text('organisation'),
+          topic: text('tier') || undefined,
+          notes: text('message') || undefined,
+        };
+        submit.disabled = true;
+        submit.setAttribute('data-sending', '');
+        submitText.textContent = form.dataset.sending || 'Sending…';
+        try {
+          // Keep "Sending…" visible long enough for the animation to read.
+          const [res] = await Promise.all([
+            fetch(ENQUIRY_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }),
+            new Promise((r) => setTimeout(r, 1200)),
+          ]);
+          const json = await res.json().catch(() => null);
+          if (res.status === 400 && Array.isArray(json?.errors) && json.errors.length) {
+            let first: HTMLElement | null = null;
+            for (const err of json.errors as { path: string; message: string }[]) {
+              const field = String(err.path).replace(/^body./, '');
+              const key = field === 'organisation' || field === 'name' || field === 'email' || field === 'phone' ? field : field === 'topic' ? 'tier' : field === 'notes' ? 'message' : field;
+              const input = form.querySelector<HTMLElement>(`[name="${key}"]`);
+              const msg = form.querySelector<HTMLElement>(`[data-error-for="${key}"]`);
+              if (msg) {
+                msg.textContent = err.message;
+                msg.classList.remove('hidden');
+              }
+              input?.setAttribute('aria-invalid', 'true');
+              first ??= input;
+            }
+            first?.focus();
+            return;
+          }
+          if (!res.ok || json?.success === false) throw new Error(json?.message || String(res.status));
+          done();
+        } catch {
+          errorBox.classList.remove('hidden');
+        } finally {
+          submit.disabled = false;
+          submit.removeAttribute('data-sending');
+          submitText.textContent = originalLabel;
+        }
+        return;
+      }
 
       const ep = form.dataset.endpoint;
       if (!ep) {
@@ -119,6 +175,7 @@ export function Form({
         return;
       }
       submit.disabled = true;
+      submit.setAttribute('data-sending', '');
       submitText.textContent = form.dataset.sending || 'Sending…';
       try {
         const body = JSON.stringify({ ...data, submittedAt: new Date().toISOString() });
@@ -139,6 +196,7 @@ export function Form({
         errorBox.classList.remove('hidden');
       } finally {
         submit.disabled = false;
+        submit.removeAttribute('data-sending');
         submitText.textContent = originalLabel;
       }
     };
@@ -151,7 +209,7 @@ export function Form({
       });
       form.removeEventListener('submit', onSubmit as unknown as EventListener);
     };
-  }, []);
+  }, [dummy, enquiryApi, lang]);
 
   return (
     <form
@@ -177,7 +235,18 @@ export function Form({
       <div data-fields>
         <div className={grid ? 'grid gap-5 sm:grid-cols-2' : undefined}>{children}</div>
         <div className="mt-6 flex flex-wrap items-center gap-4">
-          <LimeButton type="submit" label={submitLabel ?? t('form.submit')} data-submit />
+          <button
+            type="submit"
+            data-submit
+            className="send-btn group relative inline-flex min-h-13 items-center justify-center gap-3 overflow-hidden rounded-xl bg-blue px-7 text-[0.95rem] font-semibold text-white shadow-[0_12px_30px_-10px_rgba(20,50,200,0.7)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#1a3fd6] disabled:cursor-wait"
+          >
+            <span className="relative">{submitLabel ?? t('form.submit')}</span>
+            <svg className="send-plane relative" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M22 2 11 13" />
+              <path d="M22 2 15 22l-4-9-9-4 20-7Z" />
+            </svg>
+            <span className="send-shine pointer-events-none absolute inset-y-0 -left-1/2 w-1/2 -skew-x-12 bg-white/25" aria-hidden="true" />
+          </button>
           <p className={['text-sm', dark ? 'text-mist' : 'text-muted'].join(' ')}>
             {lang === 'ml' ? 'നിങ്ങളുടെ വിവരങ്ങൾ KILF-നു മാത്രം.' : 'We only use your details for KILF.'}{' '}
             <a href={lang === 'ml' ? '/ml/privacy' : '/privacy'} className="underline decoration-1 underline-offset-4">
@@ -194,14 +263,23 @@ export function Form({
         </p>
       </div>
 
-      <div data-success className={['hidden p-6 sm:p-8', dark ? 'bg-white/10' : 'bg-sky'].join(' ')} tabIndex={-1} role="status">
-        <div className="flex items-start gap-4">
-          <span className="inline-grid size-12 shrink-0 place-items-center bg-lime text-ink">
-            <Icon name="check" size={26} />
+      <div data-thanks className="pop-fade fixed inset-0 z-50 hidden items-center justify-center bg-ink/70 p-4 backdrop-blur-md [&:not(.hidden)]:flex" role="dialog" aria-modal="true" aria-label={resolvedSuccessTitle}>
+        <div className="pop-in on-dark relative flex w-full max-w-md flex-col items-center gap-6 overflow-hidden rounded-[2rem] border border-white/15 bg-gradient-to-b from-[#1b2a9a] to-[#0b1250] px-8 pb-12 pt-12 text-center text-white shadow-[0_40px_120px_-20px_rgba(0,0,0,0.7)] sm:px-12">
+          <div className="pointer-events-none absolute -top-24 left-1/2 size-72 -translate-x-1/2 rounded-full bg-lime/25 blur-3xl" aria-hidden="true" />
+          <span className="relative grid size-20 place-items-center" aria-hidden="true">
+            <span className="thanks-ring absolute inset-0 rounded-full bg-lime/40" />
+            <span className="thanks-check relative grid size-20 place-items-center rounded-full bg-lime text-ink shadow-[0_10px_40px_-8px_rgba(226,240,120,0.8)]">
+              <svg viewBox="0 0 24 24" width="38" height="38" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
+                <path className="thanks-tick" d="m5 12.5 4.5 4.5L19 7.5" />
+              </svg>
+            </span>
           </span>
-          <div>
-            <p className="font-display text-2xl font-semibold tracking-[-0.03em]">{resolvedSuccessTitle}</p>
-            <p className={['mt-1', dark ? 'text-cream/90' : 'text-muted'].join(' ')}>{successText ?? t('form.success')}</p>
+          <div className="relative">
+            <p className="font-display text-[2rem] font-semibold leading-none tracking-[-0.04em]">{resolvedSuccessTitle}</p>
+            <p className="mx-auto mt-3 max-w-xs text-[1.05rem] leading-relaxed text-white/80">{successText ?? t('form.success')}</p>
+            <p className="sr-only" role="status">
+              {lang === 'ml' ? 'ഹോം പേജിലേക്ക് മടങ്ങുന്നു…' : 'Taking you back to the home page…'}
+            </p>
           </div>
         </div>
       </div>

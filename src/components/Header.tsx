@@ -1,5 +1,6 @@
 'use client';
 
+import { SmartLink } from '@/components/SmartLink';
 import { useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
 import { Logo } from './Logo';
@@ -10,9 +11,8 @@ import { useTranslations, localizePath, parsePath } from '@/i18n/ui';
 
 /**
  * Site header. Derives lang/path from the current URL itself (usePathname),
- * so no props are needed. Internal links are plain <a> tags on purpose: every
- * navigation is a full page load, matching the previous Astro MPA exactly,
- * which is what the reveal/lake-water/motion scripts assume.
+ * so no props are needed. Internal links use next/link for client-side navigation and
+ * prefetching; the reveal/lake-water scripts re-run on each route change.
  */
 export function Header() {
   const pathname = usePathname();
@@ -24,14 +24,8 @@ export function Header() {
   const nav = [
     { href: '/about', label: t('nav.about') },
     { href: '/speakers', label: t('nav.speakers') },
+    { href: '/khasak', label: t('nav.theatre') },
     { href: '/visit', label: t('nav.visit') },
-  ];
-  const more = [
-    { href: '/get-involved', label: t('nav.involved') },
-    { href: '/youth', label: t('nav.youth') },
-    { href: '/partners', label: t('nav.partners') },
-    { href: '/faq', label: t('nav.faq') },
-    { href: '/contact', label: t('nav.contact') },
   ];
   // Malayalam labels are longer, so the full nav needs more room.
   const wide = lang === 'ml';
@@ -103,11 +97,9 @@ export function Header() {
     <header ref={headerRef} className="site-header" data-header data-overlay={overlay ? '' : undefined}>
       <div className="bar">
         <div className="flex h-[var(--hh)] w-full px-4 md:px-6 items-center justify-between gap-4">
-          <a href={lp('/')} className="-ml-1 flex min-h-11 items-center gap-3.5 px-1">
-            {/* No `src`: Header is a Client Component, so it can't resolve a real
-                logo file off disk (see the note in Logo.tsx) — it always gets the
-                inline SVG stand-in. Deliberate simplification. */}
-            <Logo decorative className="h-9 lg:h-10" />
+          <SmartLink href={lp('/')} className="-ml-1 flex min-h-11 items-center gap-3.5 px-1">
+            {/* Client Component, so it points at the logo file directly rather than resolving it off disk. */}
+            <Logo decorative src="/kilf-assets/logos/kilf-logo.png" className="h-[3.4rem] lg:h-14" />
             <span
               className={`desc hidden whitespace-nowrap text-[0.62rem] font-bold uppercase leading-[1.45] tracking-[0.14em] ${wide ? '2xl:block' : 'xl:block'}`}
               lang="en"
@@ -117,15 +109,15 @@ export function Header() {
               Literature Festival
             </span>
             <span className="sr-only">KILF 2027 — {t('nav.home')}</span>
-          </a>
+          </SmartLink>
 
           <nav aria-label={t('nav.primary')} className={`hidden ${wide ? 'xl:block' : 'lg:block'}`}>
             <ul className="flex items-center gap-0.5 xl:gap-1.5">
               {nav.map((item) => (
                 <li key={item.href}>
-                  <a href={lp(item.href)} aria-current={isCurrent(item.href) ? 'page' : undefined} className="nav-link">
+                  <SmartLink href={lp(item.href)} aria-current={isCurrent(item.href) ? 'page' : undefined} className="nav-link">
                     {item.label}
-                  </a>
+                  </SmartLink>
                 </li>
               ))}
             </ul>
@@ -168,9 +160,9 @@ export function Header() {
             <LimeButton href={lp('/get-involved#register')} label={t('cta.register')} className="w-full" />
           </div>
           <ul className="mt-6 flex-1">
-            {[...nav, ...more].map((item, i) => (
+            {nav.map((item, i) => (
               <li key={item.href} style={{ '--i': i + 1 } as React.CSSProperties}>
-                <a
+                <SmartLink
                   href={lp(item.href)}
                   aria-current={isCurrent(item.href) ? 'page' : undefined}
                   className="menu-link flex min-h-12 items-center justify-between border-b border-white/15 py-2.5 font-display text-[1.5rem] font-semibold tracking-[-0.03em] text-white aria-[current=page]:text-lime"
@@ -179,7 +171,7 @@ export function Header() {
                   <span aria-hidden="true" className="text-[1.05rem] text-lime">
                     ↗
                   </span>
-                </a>
+                </SmartLink>
               </li>
             ))}
           </ul>
@@ -228,7 +220,7 @@ export function Header() {
           backdrop-filter: none;
           -webkit-backdrop-filter: none;
         }
-        .nav-link {
+        .site-header :global(.nav-link) {
           position: relative;
           display: inline-flex;
           min-height: 2.75rem;
@@ -238,7 +230,7 @@ export function Header() {
           font-weight: 500;
           transition: opacity 0.3s ease;
         }
-        .nav-link::after {
+        .site-header :global(.nav-link)::after {
           content: '';
           position: absolute;
           left: 0.7rem;
@@ -250,11 +242,11 @@ export function Header() {
           transform-origin: left;
           transition: transform 0.5s var(--ease-calm);
         }
-        .nav-link:hover {
+        .site-header :global(.nav-link):hover {
           opacity: 1;
         }
-        .nav-link:hover::after,
-        .nav-link[aria-current='page']::after {
+        .site-header :global(.nav-link):hover::after,
+        .site-header :global(.nav-link)[aria-current='page']::after {
           transform: scaleX(1);
         }
         .lang,

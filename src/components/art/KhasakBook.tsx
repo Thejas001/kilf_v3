@@ -1,4 +1,5 @@
 import { Illustration } from '@/components/Illustration';
+import { asset } from '@/lib/images';
 
 /**
  * Khasakkinte Ithihasam as a book that opens into a stage. The cover swings
@@ -15,6 +16,8 @@ interface Props {
 }
 
 export function KhasakBook({ novel, staged, when, className = '' }: Props) {
+  // Phones show the plate at ~320px wide: serve a small WebP instead of the 1600px JPEG.
+  const mobilePlate = asset('illustrations/p4_stage-mobile.webp');
   return (
     <div className={['book', className].filter(Boolean).join(' ')} data-book>
       <div className="book-shadow" aria-hidden="true"></div>
@@ -22,7 +25,10 @@ export function KhasakBook({ novel, staged, when, className = '' }: Props) {
         {/* The right-hand page: the stage */}
         <div className="page page-right">
           <div className="plate">
-            <Illustration src="illustrations/p4_stage.jpg" alt="" sizes="(min-width: 1024px) 24vw, 70vw" className="absolute inset-0 h-full w-full object-cover object-[64%_center]" />
+            <picture>
+              {!mobilePlate.placeholder && <source media="(max-width: 1023px)" srcSet={mobilePlate.src} type="image/webp" />}
+              <Illustration src="illustrations/p4_stage.jpg" alt="" sizes="(min-width: 1024px) 24vw, 70vw" className="absolute inset-0 h-full w-full object-cover object-[64%_center]" />
+            </picture>
             <div className="plate-light" aria-hidden="true"></div>
           </div>
           <p className="plate-caption">{when}</p>

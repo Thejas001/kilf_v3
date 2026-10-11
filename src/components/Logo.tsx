@@ -22,7 +22,7 @@ interface Props {
 
 export function Logo({ tone = 'light', className = '', decorative = false, src }: Props) {
   if (src) {
-    return <img src={src} alt={decorative ? '' : 'KILF 2027'} className={`h-10 w-auto ${className}`} width={96} height={44} />;
+    return <img src={src} alt={decorative ? '' : 'KILF 2027'} className={`h-10 w-auto ${className}`} width={419} height={855} />;
   }
   return (
     <svg

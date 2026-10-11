@@ -19,7 +19,7 @@ const getting: [string, string, string][] = [
 ];
 const stay: [string, string, string][] = [
   ['bed', 'Where to stay', 'Kollam has city hotels, family-run homestays and lakeside resorts around Ashtamudi. New Year is a busy week on the Kerala coast, so book early.'],
-  ['bus', 'Getting around', 'Autorickshaws and taxis link the three venues. App cabs and KSRTC buses run across the city.'],
+  ['bus', 'Getting around', 'Autorickshaws and taxis link the venues. App cabs and KSRTC buses run across the city.'],
   ['bowl', 'Eating well', 'Kollam is known for its seafood and its cashews. In the evenings, the festival’s food strand brings the city’s kitchens to the water.'],
 ];
 const around: [string, string][] = [
@@ -37,7 +37,7 @@ const tips: [string, string, string][] = [
 ];
 
 export function Visit({ lang }: Props) {
-  const venues = site.venues.map((v) => {
+  const venues = site.venues.filter((v) => v.id !== 'ashramam').map((v) => {
     const hasCoords = !isPlaceholder(v.lat) && !isPlaceholder(v.lng);
     const q = hasCoords ? `${v.lat},${v.lng}` : v.mapsQuery;
     return {
@@ -50,13 +50,13 @@ export function Visit({ lang }: Props) {
 
   return (
     <>
-      <PageHero chapter={1} label="Plan your visit" text="Three venues." accent="One shore." lead="All three venues are in Kollam city, close to Ashtamudi Lake." />
+      <PageHero chapter={1} label="Plan your visit" text="Two venues." accent="One shore." lead="Both venues are in Kollam city, close to Ashtamudi Lake." />
 
       <Section tone="cream" className="!pt-0" labelledby="venues-h">
         <h2 id="venues-h" className="sr-only">
           Venues
         </h2>
-        <ul className="grid border-l border-t border-line lg:grid-cols-3">
+        <ul className="grid border-l border-t border-line lg:grid-cols-2">
           {venues.map((v, i) => (
             <li key={v.id} className="flex flex-col border-b border-r border-line">
               <VisitMap embed={v.embed} title={`Map showing ${v.name}`} />

@@ -2,10 +2,19 @@
 
 import { useEffect } from 'react';
 
-/** Runs src/scripts/lake-water.ts, which itself finds every [data-lake] on the page (mirrors LakeArt's own <script>). */
+/** Starts the water on every [data-lake] on the page; re-runs each time a new page mounts one. */
 export function LakeWaterBoot() {
   useEffect(() => {
-    import('@/scripts/lake-water');
+    let live = true;
+    import('@/scripts/lake-water').then((m) => {
+      if (!live) return;
+      const idle = (window as Window & { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number }).requestIdleCallback;
+      if (idle) idle(m.boot, { timeout: 2000 });
+      else setTimeout(m.boot, 300);
+    });
+    return () => {
+      live = false;
+    };
   }, []);
   return null;
 }

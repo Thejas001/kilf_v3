@@ -161,7 +161,7 @@ class Lake {
   }
 
   private get allowed() {
-    return !this.failed && this.visible && document.documentElement.dataset.motion !== 'paused' && !matchMedia('(prefers-reduced-motion: reduce)').matches;
+    return !this.failed && this.root.isConnected && this.visible && document.documentElement.dataset.motion !== 'paused' && !matchMedia('(prefers-reduced-motion: reduce)').matches;
   }
 
   private update() {
@@ -381,7 +381,7 @@ class Lake {
   }
 }
 
-function boot() {
+export function boot() {
   document.querySelectorAll<HTMLElement>('[data-lake]').forEach((root) => {
     const img = root.querySelector('img');
     const cv = root.querySelector<HTMLCanvasElement>('canvas[data-water]');
@@ -390,8 +390,3 @@ function boot() {
     new Lake(root, img, cv, JSON.parse(cv.dataset.water || '{}'));
   });
 }
-
-// Let the page settle first: the water is a delight, not the content.
-const idle = (window as Window & { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number }).requestIdleCallback;
-if (idle) idle(boot, { timeout: 2000 });
-else setTimeout(boot, 300);

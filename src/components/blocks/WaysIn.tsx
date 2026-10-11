@@ -1,5 +1,6 @@
 'use client';
 
+import { SmartLink } from '@/components/SmartLink';
 import { useTranslations, localizePath, type Lang, type UIKey } from '@/i18n/ui';
 
 /**
@@ -26,7 +27,7 @@ export function WaysIn({ lang = 'en' }: Props) {
       <ul className="grid border-l border-t border-line md:grid-cols-2" data-reveal-group>
         {cards.map((c, i) => (
           <li key={c.key} className={['border-b border-r border-line', c.surface].join(' ')}>
-            <a href={lp(c.href)} className="ways group relative flex h-full min-h-[23rem] flex-col overflow-hidden p-8 sm:min-h-[26rem] sm:p-10 lg:p-12">
+            <SmartLink href={lp(c.href)} className="ways group relative flex h-full min-h-[23rem] flex-col overflow-hidden p-8 sm:min-h-[26rem] sm:p-10 lg:p-12">
               <div className="flex items-start justify-between gap-6">
                 <p className="eyebrow">
                   <span lang="en">{String(i + 1).padStart(2, '0')}</span> / {t(`home.ways.${c.key}.label` as UIKey)}
@@ -57,7 +58,7 @@ export function WaysIn({ lang = 'en' }: Props) {
               </h3>
               <p className={['mt-5 max-w-md text-[1.02rem] leading-relaxed', c.body].join(' ')}>{t(`home.ways.${c.key}.text` as UIKey)}</p>
               {c.key === 'lit' && <p className="eyebrow mt-8 text-white/90">{t('home.ways.lit.tags')}</p>}
-            </a>
+            </SmartLink>
           </li>
         ))}
       </ul>
