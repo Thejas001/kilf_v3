@@ -74,7 +74,12 @@ export function Contact({ lang }: Props) {
               </div>
             </li>
           </ul>
-          <Form id="contact-form" name="contact" lang={lang} className="card p-6 sm:p-9" successText="Thanks for writing. We’ll reply as soon as we can.">
+          <Form
+            id="contact-form"
+            name="contact"
+            lang={lang}
+            dummy
+            className="rounded-[1.75rem] border border-white/70 bg-cream p-6 shadow-[0_30px_80px_-30px_rgba(15,28,116,0.35)] ring-1 ring-ink/5 sm:p-8" successText="Thanks for writing. We’ll reply as soon as we can.">
             <Field formId="contact-form" name="name" label="Name" autocomplete="name" required />
             <Field formId="contact-form" name="email" type="email" label="Email" autocomplete="email" required />
             <Field formId="contact-form" name="phone" type="tel" label="Phone" autocomplete="tel" inputmode="tel" />
@@ -82,7 +87,7 @@ export function Contact({ lang }: Props) {
             <Field
               formId="contact-form"
               name="topic"
-              type="select"
+              type="choice"
               label="Topic"
               options={['General question', 'Media & press', 'Speaker / programme', 'Tickets & passes', 'Partnership', 'Volunteering', 'Accessibility', 'Other']}
               full
