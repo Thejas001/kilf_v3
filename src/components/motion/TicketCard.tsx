@@ -34,13 +34,12 @@ const kinds: Record<Kind, { tag: string; name: string; line: string; price: numb
   },
 };
 
-/** The three performances, all at Ashramam Maidan. */
+/** The three performances. */
 const nights = [
   { id: '2027-01-01', day: 'Fri', date: '1 Jan', long: 'Friday 1 January 2027' },
   { id: '2027-01-02', day: 'Sat', date: '2 Jan', long: 'Saturday 2 January 2027' },
   { id: '2027-01-03', day: 'Sun', date: '3 Jan', long: 'Sunday 3 January 2027' },
 ];
-const venue = 'Ashramam Maidan, Kollam';
 const inr = (n: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(n);
 
 function Card({ notifyHref }: Props) {
@@ -136,7 +135,7 @@ function Card({ notifyHref }: Props) {
             );
           })}
         </div>
-        <p className="mt-3 text-[0.92rem] text-navy/80">{venue} · evening, time to be confirmed</p>
+        <p className="mt-3 text-[0.92rem] text-navy/80">Evening, time to be confirmed</p>
       </fieldset>
       <hr className="my-7 border-0 border-t border-dashed border-[#aab6e3]" />
 
@@ -205,7 +204,7 @@ function Card({ notifyHref }: Props) {
                   <span>× {qty}</span>
                 </div>
                 <p className="display mt-4 text-[1.7rem]">Khasakkinte Ithihasam</p>
-                <p className="mt-1 text-sm text-white/80">{n.long} · {venue}</p>
+                <p className="mt-1 text-sm text-white/80">{n.long}</p>
                 <ul className="mt-4 space-y-1.5 text-[0.95rem]">
                   {k.includes.map((line) => (
                     <li key={line} className="flex gap-2.5">

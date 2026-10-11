@@ -198,10 +198,12 @@ export function Schedule({ days, lang }: Props) {
                     )}
                   </div>
                   <p className="flex flex-wrap gap-x-5 gap-y-1.5 text-sm text-muted sm:col-start-2 lg:col-start-auto lg:flex-col lg:items-end lg:text-right">
-                    <span className="inline-flex items-start gap-1.5">
-                      <Icon name="pin" size={16} className="mt-0.5 shrink-0" />
-                      {venueName(s.venue)}
-                    </span>
+                    {s.venue && (
+                      <span className="inline-flex items-start gap-1.5">
+                        <Icon name="pin" size={16} className="mt-0.5 shrink-0" />
+                        {venueName(s.venue)}
+                      </span>
+                    )}
                     {s.language && (
                       <span className="inline-flex items-start gap-1.5">
                         <Icon name="globe" size={16} className="mt-0.5 shrink-0" />

@@ -9,7 +9,6 @@
 | `[@HANDLE]` social handle | Footer, Contact page | `src/lib/site.ts` → `socialHandle` **and** `socialUrl` (the link appears once both are set) |
 | `[LAT]`, `[LNG]` for Sreenarayana Guru Cultural Centre | Plan your visit | `src/lib/site.ts` → `venues[0]` |
 | `[LAT]`, `[LNG]` for 8 Point Art Cafe | Plan your visit | `src/lib/site.ts` → `venues[1]` |
-| `[LAT]`, `[LNG]` for Ashramam Maidan | Plan your visit | `src/lib/site.ts` → `venues[2]` |
 | `[PROPOSAL PDF]` partnership proposal | Partners page | Add `public/downloads/kilf-2027-partnership-proposal.pdf` |
 
 The maps and "Get directions" links already work from the venue names. Coordinates just make them exact.

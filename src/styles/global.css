@@ -429,13 +429,13 @@ html[data-motion='paused'] *::after {
   container-type: inline-size;
   perspective: 2600px;
 }
-/* Phones: the right-hand page is centred and large; the cover swings out to the left. */
+/* Phones: the whole spread fits the screen. Closed, the cover sits centred; as it opens the
+   book slides across so the open spread ends up centred (same as desktop). */
 @media (max-width: 1023px) {
   [data-book] {
-    --travel: 0;
-    --pw: min(72vw, 21rem);
-    width: calc(2 * var(--pw));
-    margin-left: calc(50% - 1.5 * var(--pw));
+    width: 100%;
+    max-width: 32rem;
+    margin-inline: auto;
   }
 }
 @media (min-width: 1024px) {

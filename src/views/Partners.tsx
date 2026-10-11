@@ -104,7 +104,7 @@ export function Partners({ lang }: Props) {
                 <p className="display text-2xl sm:text-4xl">
                   Where words meet the <span className="text-grad-warm">world.</span>
                 </p>
-                <p className="text-xs text-mist sm:text-sm">Main stage · Ashramam Maidan</p>
+                <p className="text-xs text-mist sm:text-sm">Main stage</p>
               </div>
             </div>
             <figcaption className="border-t border-line p-4 text-sm font-semibold">Main stage backdrop</figcaption>

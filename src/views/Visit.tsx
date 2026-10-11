@@ -37,7 +37,7 @@ const tips: [string, string, string][] = [
 ];
 
 export function Visit({ lang }: Props) {
-  const venues = site.venues.filter((v) => v.id !== 'ashramam').map((v) => {
+  const venues = site.venues.map((v) => {
     const hasCoords = !isPlaceholder(v.lat) && !isPlaceholder(v.lng);
     const q = hasCoords ? `${v.lat},${v.lng}` : v.mapsQuery;
     return {

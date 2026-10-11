@@ -141,7 +141,7 @@ const sessionSchema = z.object({
   end: z.string().optional(),
   title: z.string(),
   description: z.string().optional(),
-  venue: z.enum(['sngcc', '8point', 'ashramam']),
+  venue: z.enum(['sngcc', '8point']).optional(),
   strand: z.string().optional(), // strand id from strands.json, or "youth"
   format: z.enum(sessionFormats).optional(),
   speakers: z.array(z.string()).default([]), // speaker slugs
@@ -159,7 +159,7 @@ const dayScheduleSchema = z.object({
   /** The day's title, e.g. "First light." */
   theme: z.string(),
   blurb: z.string(),
-  /** Things that run all day, e.g. "Book fair · Ashramam Maidan · 10:00–21:00". */
+  /** Things that run all day, e.g. "Book fair · 10:00–21:00". */
   allDay: z.array(z.string()).default([]),
   sessions: z.array(sessionSchema),
 });

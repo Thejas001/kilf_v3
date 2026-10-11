@@ -111,7 +111,7 @@ export async function Passes({ lang }: Props) {
             <ChapterLabel n={3} label="Signature theatre" tone="coral" />
             <Headline id="theatre-h" text="The play is" accent="ticketed separately." tone="coral" accentStyle="gradient" className="mt-6" />
             <p className="mt-6 max-w-xl text-lg leading-relaxed text-ink/85">
-              Khasakkinte Ithihasam needs its own ticket: three evenings at Ashramam Maidan, on 1, 2 and 3 January. Choose a theatre ticket on its own, or add all five days of the festival for just ₹100
+              Khasakkinte Ithihasam needs its own ticket: three evenings, on 1, 2 and 3 January. Choose a theatre ticket on its own, or add all five days of the festival for just ₹100
               more.
             </p>
             <div className="mt-9 flex flex-wrap items-center gap-x-8 gap-y-4">

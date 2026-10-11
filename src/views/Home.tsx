@@ -221,25 +221,24 @@ export function Home({ lang }: Props) {
         <div className="khasak-curtain khasak-curtain-l" aria-hidden="true"></div>
         <div className="khasak-curtain khasak-curtain-r" aria-hidden="true"></div>
         <div className="khasak-sticky">
-          <div className="container-kilf relative grid w-full items-center gap-14 py-20 sm:py-24 lg:grid-cols-12 lg:gap-12 lg:py-10">
-            <div className="relative order-2 lg:order-1 lg:col-span-7" data-khasak-stage>
+          <div className="container-kilf relative grid w-full grid-cols-[minmax(0,1fr)] items-center gap-14 py-20 sm:py-24 lg:grid-cols-12 lg:gap-12 lg:py-10">
+            <div className="relative order-2 min-w-0 lg:order-1 lg:col-span-7" data-khasak-stage>
               <div className="khasak-beam" aria-hidden="true"></div>
-              <KhasakBook novel={t('home.khasak.novel')} staged={t('home.khasak.staged')} when={`${t('home.khasak.where')} · ${t('home.khasak.when')} 2027`} />
+              <KhasakBook novel={t('home.khasak.novel')} staged={t('home.khasak.staged')} when={`${t('home.khasak.when')} 2027`} />
               <p className="khasak-hint eyebrow mt-10 hidden text-center text-white/70" aria-hidden="true">
                 {t('home.khasak.hint')} ↓
               </p>
             </div>
-            <div className="order-1 lg:order-2 lg:col-span-5">
+            <div className="order-1 min-w-0 lg:order-2 lg:col-span-5">
               <div className="flex flex-wrap items-center gap-3">
                 <ChapterLabel n={5} label={t('home.khasak.chapter')} tone="dark" />
                 <Badge tone="dark">{t('home.khasak.proposed')}</Badge>
               </div>
               <Headline id="khasak-h" text={t('home.khasak.h')} accent={t('home.khasak.accent')} tone="dark" accentStyle="gradient" className="mt-6" />
               <p className="mt-6 max-w-lg text-lg leading-relaxed text-white/80">{t('home.khasak.lead')}</p>
-              <dl className="mt-8 grid grid-cols-3 gap-px bg-white/15 ring-1 ring-white/15">
+              <dl className="mt-8 grid grid-cols-2 gap-px bg-white/15 ring-1 ring-white/15">
                 {[
                   [t('home.hero.when'), t('home.khasak.when')],
-                  [t('home.hero.where'), t('home.khasak.where')],
                   [t('home.khasak.ticketsLabel'), t('home.khasak.price')],
                 ].map(([label, value]) => (
                   <div key={label} className="bg-[#130c14] p-4 sm:p-5">

@@ -3,7 +3,7 @@
     "id": "when-where",
     "order": 1,
     "question": "When and where is KILF?",
-    "answer": "KILF 2027 runs for five days, from 31 December 2026 to 4 January 2027, in Kollam, Kerala. Sessions take place at the Sreenarayana Guru Cultural Centre, 8 Point Art Cafe and Ashramam Maidan, all in Kollam city, close to Ashtamudi Lake.",
+    "answer": "KILF 2027 runs for five days, from 31 December 2026 to 4 January 2027, in Kollam, Kerala. Sessions take place at the Sreenarayana Guru Cultural Centre and 8 Point Art Cafe, both in Kollam city, close to Ashtamudi Lake.",
     "group": "festival"
   },
   {
@@ -31,7 +31,7 @@
     "id": "theatre",
     "order": 5,
     "question": "Is Khasakkinte Ithihasam included in the Festival Pass?",
-    "answer": "No, the play is ticketed separately: three evening performances at Ashramam Maidan on 1, 2 and 3 January. A theatre ticket is ₹1,500. The theatre + Festival Pass bundle, ₹1,600, adds all five days of the festival.",
+    "answer": "No, the play is ticketed separately: three evening performances on 1, 2 and 3 January. A theatre ticket is ₹1,500. The theatre + Festival Pass bundle, ₹1,600, adds all five days of the festival.",
     "group": "tickets"
   },
   {

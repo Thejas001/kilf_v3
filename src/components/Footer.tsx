@@ -1,11 +1,9 @@
-import QRCode from 'qrcode';
 import { SmartLink } from '@/components/SmartLink';
 import { Logo } from './Logo';
 import { Placeholder } from './Placeholder';
 import { LimeButton } from './LimeButton';
 import RippleField from './motion/RippleField';
 import { site, isPlaceholder } from '@/lib/site';
-import { siteUrl } from '@/lib/seo';
 import { logoUrl } from '@/lib/images';
 import { useTranslations, localizePath, type Lang } from '@/i18n/ui';
 
@@ -17,13 +15,6 @@ export async function Footer({ lang }: Props) {
   const t = useTranslations(lang);
   const lp = (p: string) => localizePath(p, lang);
   const logoFile = logoUrl('kilf-logo-white');
-  const url = new URL(lp('/'), siteUrl).href;
-  const qr = await QRCode.toString(url, {
-    type: 'svg',
-    margin: 1,
-    color: { dark: '#13308C', light: '#FFFFFF' },
-    errorCorrectionLevel: 'M',
-  });
 
   const cols = [
     {
@@ -108,7 +99,12 @@ export async function Footer({ lang }: Props) {
               </li>
               <li>
                 {site.socialUrl && !isPlaceholder(site.socialHandle) ? (
-                  <a href={site.socialUrl} className="inline-flex min-h-10 items-center text-white hover:text-lime" rel="noopener" target="_blank">
+                  <a href={site.socialUrl} className="inline-flex min-h-10 items-center gap-2.5 text-white hover:text-lime" rel="noopener" target="_blank" aria-label={`Instagram: ${site.socialHandle}`}>
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <rect x="3" y="3" width="18" height="18" rx="5" />
+                      <circle cx="12" cy="12" r="4.2" />
+                      <circle cx="17.4" cy="6.6" r="1" fill="currentColor" stroke="none" />
+                    </svg>
                     {site.socialHandle}
                   </a>
                 ) : (
@@ -123,10 +119,6 @@ export async function Footer({ lang }: Props) {
                 </SmartLink>
               </li>
             </ul>
-            <figure className="mt-5 flex items-center gap-4">
-              <div className="size-20 shrink-0 bg-white p-1.5 [&_svg]:size-full" role="img" aria-label={`QR code linking to ${url}`} dangerouslySetInnerHTML={{ __html: qr }} />
-              <figcaption className="max-w-[9rem] text-sm leading-snug text-white/70">{t('footer.scan')}</figcaption>
-            </figure>
           </div>
         </div>
 

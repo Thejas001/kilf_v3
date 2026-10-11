@@ -94,7 +94,7 @@ To remove a speaker, delete their `.md` file.
 
 `src/content/schedule.json` holds the day-by-day programme (a proposed one for now: 31 December to 4 January, 45 sessions). The Programme page shows it as tabs, one per day, with a strand filter; with `[]` it falls back to the six teasers and a "Notify me" banner.
 
-Each day has a `theme` ("First light."), a `blurb` and `allDay` lines (book fair, food festival, exhibition). Each session has `start`/`end`, `title`, `description`, `venue` (`sngcc`, `8point` or `ashramam`), `strand` (an id from `strands.json`, or `youth`), `format` (conversation, panel, reading, workshop, performance, screening, walk or ceremony), `speakers` (speaker file names), `guests` (other participants as text, e.g. "Malayalam poets (invited)"), `language`, `highlight` (a ★ must-see) and an optional `link` (e.g. theatre tickets). Speaker chips link to the speaker's note on `/speakers`.
+Each day has a `theme` ("First light."), a `blurb` and `allDay` lines (book fair, food festival, exhibition). Each session has `start`/`end`, `title`, `description`, `venue` (`sngcc` or `8point`, optional), `strand` (an id from `strands.json`, or `youth`), `format` (conversation, panel, reading, workshop, performance, screening, walk or ceremony), `speakers` (speaker file names), `guests` (other participants as text, e.g. "Malayalam poets (invited)"), `language`, `highlight` (a ★ must-see) and an optional `link` (e.g. theatre tickets). Speaker chips link to the speaker's note on `/speakers`.
 
 ```json
 [
@@ -104,7 +104,7 @@ Each day has a `theme` ("First light."), a `blurb` and `allDay` lines (book fair
     "label": "Day 2",
     "theme": "First light.",
     "blurb": "One or two sentences about the day.",
-    "allDay": ["Book fair · Ashramam Maidan · 10:00–21:00"],
+    "allDay": ["Book fair · 10:00–21:00"],
     "sessions": [
       {
         "start": "10:00",
@@ -124,7 +124,7 @@ Each day has a `theme` ("First light."), a `blurb` and `allDay` lines (book fair
 ]
 ```
 
-- `venue` is one of `sngcc` (Sreenarayana Guru Cultural Centre), `8point` (8 Point Art Cafe) or `ashramam` (Ashramam Maidan). Venues are defined in `src/lib/site.ts`.
+- `venue` is one of `sngcc` (Sreenarayana Guru Cultural Centre) or `8point` (8 Point Art Cafe). Venues are defined in `src/lib/site.ts`.
 - `speakers` are speaker file names without `.md`.
 - `language` (optional) is one of `Malayalam`, `English`, `Tamil` or `Bilingual`.
 

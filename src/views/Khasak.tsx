@@ -25,12 +25,11 @@ const facts: [string, string][] = [
 const plan: [string, string][] = [
   ['Festival window', '31 Dec 2026 — 4 Jan 2027'],
   ['Performances', '1, 2 and 3 January 2027 · evenings'],
-  ['Venue', 'Ashramam Maidan, Kollam'],
   ['Tickets', 'Theatre ticket ₹1,500 · Theatre + Festival Pass ₹1,600 · Booking opens soon'],
 ];
 const goodToKnow: [string, string][] = [
   ['Tickets', 'The play is ticketed separately from festival passes: a theatre ticket is ₹1,500, or ₹1,600 with a Festival Pass for all five days.'],
-  ['Dates and venue', 'Three evening performances, on 1, 2 and 3 January 2027, at Ashramam Maidan, Kollam. Start times will be confirmed with booking.'],
+  ['Dates', 'Three evening performances, on 1, 2 and 3 January 2027. Start times will be confirmed with booking.'],
   ['Seating', 'Seating will be limited. Leave your details and we’ll write the moment booking opens.'],
   ['Language', 'The performance is in Malayalam.'],
   ['Age guidance', 'To be announced with the performance details.'],
@@ -183,7 +182,7 @@ export function Khasak({ lang }: Props) {
             <p className="eyebrow">Your evening at the theatre</p>
             <Headline id="tickets-h" text="One stage." accent="A world within." tone="coral" accentStyle="gradient" className="mt-6" />
             <p className="mt-6 max-w-lg text-lg leading-relaxed text-ink/85">
-              Three evenings at Ashramam Maidan, on 1, 2 and 3 January. The play is ticketed separately from the festival: a theatre ticket on its own is ₹1,500, and for ₹1,600 the theatre +
+              Three evenings, on 1, 2 and 3 January. The play is ticketed separately from the festival: a theatre ticket on its own is ₹1,500, and for ₹1,600 the theatre +
               Festival Pass adds all five days of the festival. Seating is limited.
             </p>
             <ul className="mt-10 grid gap-3 sm:grid-cols-2" data-reveal-group>
