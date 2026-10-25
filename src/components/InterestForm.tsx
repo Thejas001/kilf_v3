@@ -15,6 +15,7 @@ const TYPES = [
   { value: 'VOLUNTEER', label: 'Volunteer', hint: 'Hospitality, stage and guest care' },
   { value: 'EXHIBIT', label: 'Exhibit', hint: 'Publishers, artists and food stalls' },
   { value: 'PARTNER', label: 'Partner', hint: 'Put your brand on the shore' },
+  { value: 'INFLUENCER', label: 'Influencer', hint: 'Create and share the festival with your audience' },
 ] as const;
 
 const AGE_GROUPS = ['Under 18', '18-24', '25-34', '35-44', '45-59', '60+'];
@@ -163,7 +164,7 @@ export function InterestForm() {
         <legend className="text-sm font-semibold text-navy">
           I’d like to <span className="text-coral-ink" aria-hidden="true">*</span>
         </legend>
-        <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
+        <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-5">
           {TYPES.map((t) => (
             <label key={t.value} className="cursor-pointer">
               <input type="radio" name="interestType" value={t.value} checked={type === t.value} onChange={() => setType(t.value)} className="peer sr-only" />
