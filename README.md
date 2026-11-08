@@ -163,6 +163,23 @@ See `.env.example`. Set them in Vercel/Netlify under *Settings → Environment v
 | `NEXT_PUBLIC_GA4_ID` *or* `NEXT_PUBLIC_PLAUSIBLE_DOMAIN` | Analytics. Nothing loads if both are empty. The privacy page adapts automatically. |
 | `NEXT_PUBLIC_PARTNER_CALL_URL` | Link for "Book a partnership call" (Calendly, Cal.com…). Falls back to an email link. |
 | `NEXT_PUBLIC_WHATSAPP_URL` | WhatsApp channel/community link; shows a "Join on WhatsApp" button in the signup block. |
+| `NEXT_PUBLIC_API_URL` | Backend API origin, used only for local dev and branches other than `develop`/`main` (see Environments below). Defaults to `https://api.kilf.in`. |
+
+### Environments
+
+The backend API URL is chosen at **build time** from the git branch (`VERCEL_GIT_COMMIT_REF` on Vercel, or `GITHUB_REF_NAME`). The logic is in `api-url.mjs`, and app code reads it from `src/lib/api.ts`.
+
+| Branch | Site | API |
+|---|---|---|
+| `develop` | https://dev.kilf.in | https://dev.api.kilf.in |
+| `main` | https://www.kilf.in | https://api.kilf.in |
+| any other branch / local dev | preview / localhost | `NEXT_PUBLIC_API_URL` from `.env`, else https://api.kilf.in |
+
+For `develop` and `main`, the branch always wins over `NEXT_PUBLIC_API_URL`, so a stray env var can't point the dev site at the production API.
+
+In Vercel, set each project's **Production Branch** (*Settings → Git*) to `develop` for the dev project and `main` for the prod project.
+
+The Razorpay key is not configured here. The backend returns its public `keyId` with each booking (test key on dev, live key on prod), so the frontend never stores a key.
 
 ## 6. Deploy
 

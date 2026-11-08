@@ -3,12 +3,13 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { site } from '@/lib/site';
 import { localizePath, parsePath } from '@/i18n/ui';
+import { BACKEND_PROXY } from '@/lib/api';
 
 /** How long the thank-you card shows before heading to the landing page. */
 const REDIRECT_MS = 3000;
 
 /** Browser calls go through the /backend rewrite (next.config.mjs), like bookings. */
-const ENDPOINT = '/backend/api/early-bird';
+const ENDPOINT = `${BACKEND_PROXY}/api/early-bird`;
 
 const TYPES = [
   { value: 'REGISTER', label: 'Register', hint: 'Be a delegate at the first edition' },

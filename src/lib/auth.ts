@@ -1,5 +1,7 @@
 /** Guest auth API client. Calls go through the /backend rewrite (next.config.mjs). */
-const base = '/backend/api/auth';
+import { BACKEND_PROXY } from './api';
+
+const base = `${BACKEND_PROXY}/api/auth`;
 const KEY = 'kilf-auth';
 
 export interface Guest {

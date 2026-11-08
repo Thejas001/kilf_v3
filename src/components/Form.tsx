@@ -4,6 +4,7 @@ import { useEffect, useRef, type ReactNode } from 'react';
 import { usePathname } from 'next/navigation';
 import { site, env } from '@/lib/site';
 import { useTranslations, localizePath, type Lang } from '@/i18n/ui';
+import { BACKEND_PROXY } from '@/lib/api';
 
 /**
  * Static-hosting form. POSTs JSON to PUBLIC_FORM_ENDPOINT (Formspree,
@@ -30,7 +31,7 @@ interface Props {
 }
 
 /** Browser calls go through the /backend rewrite (next.config.mjs), like bookings. */
-const ENQUIRY_ENDPOINT = '/backend/api/enquiries';
+const ENQUIRY_ENDPOINT = `${BACKEND_PROXY}/api/enquiries`;
 const MIN_FILL_MS = 2500;
 const REDIRECT_MS = 3000;
 

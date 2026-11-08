@@ -1,5 +1,7 @@
 /** Browser calls go through the /backend rewrite (next.config.mjs) so the API's CORS allow-list doesn't matter. */
-const base = () => '/backend';
+import { BACKEND_PROXY } from './api';
+
+const base = () => BACKEND_PROXY;
 
 export interface Customer {
   name: string;
