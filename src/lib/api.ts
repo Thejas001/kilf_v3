@@ -7,5 +7,7 @@
  */
 export const API_URL = process.env.NEXT_PUBLIC_API_URL as string;
 
+// On a `develop` build this is https://dev.api.kilf.in; on `main` it is https://api.kilf.in.
+
 /** Same-origin path that next.config.mjs rewrites to API_URL. */
 export const BACKEND_PROXY = '/backend';
