@@ -75,3 +75,14 @@ When a speaker confirms, set `status: confirmed` in their file. When everything 
 - [ ] **Khasakkinte Ithihasam tickets**: the ticket card on `/khasak` is a preview only and sells nothing. When booking opens, add the date, venue and prices, and point the button at the ticketing page (`src/components/motion/TicketCard.tsx`). Confirm that Festival Passes do not include the play, as the Passes page, FAQ and ticket card now say.
 - [ ] Confirmed sponsor logos → `src/content/sponsors.json` + `kilf-assets/logos/`. Sponsor logos are not rendered yet; add a logo strip to Partners and Footer when the first partner signs.
 - [ ] Speaker bios. Adding a bio creates `/speakers/<slug>` automatically.
+
+## 6. Backend routes the profile page needs (not on the API yet)
+
+The login popup, Profile button and profile page are built. Three things need the backend (checked against `dev.api.kilf.in/api/docs` on 10 Nov 2026):
+
+- [ ] `GET /api/auth/bookings` (bearer token): the signed-in guest's bookings, taken from the guest id **in the token** (never a query parameter). Same booking shape as `GET /api/bookings/:bookingNumber`, including `ticket`, `festival`, `payment` and `ticketInstances` (`ticketNumber`, `qrCode`, `status`, attendee name, `validDate`).
+- [ ] `GET /api/auth/bookings/:bookingNumber` (bearer token): one booking, 404 if it isn't this guest's.
+- [ ] `PATCH /api/auth/me` (bearer token) with `{ name, phone? }`: returns the updated guest. Also return `phone` from `GET /api/auth/me`.
+- [ ] `POST /api/bookings` now receives the guest's bearer token: link the booking to that guest so it shows in their history.
+
+Until the booking routes exist, **My bookings** shows bookings made on that device (looked up with the account's email) and says so. Profile edits show "isn't available yet". See `src/lib/myBookings.ts` and `updateProfile` in `src/lib/auth.ts`.

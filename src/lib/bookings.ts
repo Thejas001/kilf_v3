@@ -1,5 +1,6 @@
 /** Browser calls go through the /backend rewrite (next.config.mjs) so the API's CORS allow-list doesn't matter. */
 import { BACKEND_PROXY } from './api';
+import { authFetch } from './auth';
 
 const base = () => BACKEND_PROXY;
 
@@ -63,12 +64,9 @@ export class ApiError extends Error {
 /** Backend error paths look like `body.attendees.0.name`; drop the `body.` prefix to match form keys. */
 export const fieldKey = (path: string) => path.replace(/^body\./, '');
 
+/** Sent with the guest's token when signed in, so the backend can tie the booking to their account. */
 async function call<T>(path: string, body?: unknown): Promise<T> {
-  const res = await fetch(`${base()}${path}`, {
-    method: 'POST',
-    headers: body ? { 'Content-Type': 'application/json' } : undefined,
-    body: body ? JSON.stringify(body) : undefined,
-  });
+  const res = await authFetch(path, { method: 'POST', body: body ? JSON.stringify(body) : undefined });
   const json = await res.json().catch(() => null);
   if (!res.ok || !json?.success) {
     const errors: FieldError[] = Array.isArray(json?.errors)

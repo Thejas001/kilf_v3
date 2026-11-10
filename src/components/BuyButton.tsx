@@ -19,6 +19,11 @@ import {
   type TicketRequirements,
   type Quote,
 } from '@/lib/bookings';
+import { requireLogin } from '@/lib/auth';
+import { useGuest } from '@/lib/useGuest';
+import { rememberBooking } from '@/lib/myBookings';
+import { localizePath, parsePath } from '@/i18n/ui';
+import { usePathname } from 'next/navigation';
 
 interface Props {
   ticketId: string;
@@ -49,6 +54,19 @@ export function BuyButton({ ticketId, name, unitPrice, currency, maxQuantity, re
   const [quoting, setQuoting] = useState(false);
   const [quoteError, setQuoteError] = useState('');
   const [customerName, setCustomerName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [authing, setAuthing] = useState(false);
+  const guest = useGuest();
+  const profileHref = localizePath('/profile', parsePath(usePathname()).lang);
+
+  // Fill in what the account already knows, without overwriting anything typed.
+  useEffect(() => {
+    if (!open || !guest) return;
+    setCustomerName((v) => v || guest.name);
+    setEmail((v) => v || guest.email);
+    if (guest.phone) setPhone((v) => v || guest.phone || '');
+  }, [open, guest]);
   const [attendees, setAttendees] = useState<Attendee[]>([blankAttendee()]);
   // The first attendee's name follows the customer name until the user edits it.
   const [firstNameEdited, setFirstNameEdited] = useState(false);
@@ -128,6 +146,8 @@ export function BuyButton({ ticketId, name, unitPrice, currency, maxQuantity, re
       setAttendees([blankAttendee()]);
       setFirstNameEdited(false);
       setCustomerName('');
+      setEmail('');
+      setPhone('');
     }
     setFieldErrors({});
     setError('');
@@ -135,8 +155,8 @@ export function BuyButton({ ticketId, name, unitPrice, currency, maxQuantity, re
 
   async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const f = new FormData(e.currentTarget);
-    const customer = { name: String(f.get('name')).trim(), email: String(f.get('email')).trim(), phone: String(f.get('phone')).trim() };
+    if (authing) return;
+    const customer = { name: customerName.trim(), email: email.trim(), phone: phone.trim() };
     const list: Attendee[] = shownAttendees.slice(0, qty).map((a) => {
       const out: Attendee = { name: a.name.trim() };
       if (a.phone?.trim()) out.phone = a.phone.trim();
@@ -147,10 +167,22 @@ export function BuyButton({ ticketId, name, unitPrice, currency, maxQuantity, re
     });
     setError('');
     setFieldErrors({});
+
+    // Bookings belong to an account: guests log in first. The login popup opens on top of this
+    // dialog, so the selected tickets, quantity and details stay exactly as they are.
+    setAuthing(true);
+    const signedIn = await requireLogin('Log in to finish your booking. Your tickets and details are saved.');
+    setAuthing(false);
+    if (!signedIn) {
+      setError('Log in to continue. Your selection is still here.');
+      return;
+    }
+
     setPhase('working');
     try {
       if (!(await loadRazorpay())) throw new Error('Could not load the payment window. Check your connection and try again.');
       const { booking, payment } = await createBooking(ticketId, qty, list, customer);
+      rememberBooking(signedIn.id, booking.bookingNumber);
       setPaying(true);
       let paid: boolean;
       try {
@@ -166,7 +198,10 @@ export function BuyButton({ ticketId, name, unitPrice, currency, maxQuantity, re
       setResult(await confirmPayment(booking.bookingNumber));
       setPhase('done');
     } catch (err) {
-      if (err instanceof ApiError && err.errors.length) {
+      if (err instanceof ApiError && err.status === 401) {
+        // Token expired and could not be refreshed: the session is cleared, so the next Pay asks for login again.
+        setError('Your session expired. Log in again to finish your booking. Your selection is still here.');
+      } else if (err instanceof ApiError && err.errors.length) {
         const map: Record<string, string> = {};
         const unplaced: string[] = [];
         for (const e of err.errors) {
@@ -248,8 +283,9 @@ export function BuyButton({ ticketId, name, unitPrice, currency, maxQuantity, re
                       </li>
                     ))}
                   </ul>
-                  <div>
-                    <LimeButton label="Done" className="mt-8 w-full" onClick={close} />
+                  <div className="mt-8 grid gap-3 sm:grid-cols-2">
+                    <LimeButton href={`${profileHref}?booking=${encodeURIComponent(result.bookingNumber)}`} label="View in My bookings" className="w-full" />
+                    <LimeButton label="Done" variant="ghost" arrow={false} className="w-full" onClick={close} />
                   </div>
                 </div>
               ) : (
@@ -263,12 +299,12 @@ export function BuyButton({ ticketId, name, unitPrice, currency, maxQuantity, re
                     </div>
                     <FieldErr msg={fieldErrors['customer.name']} />
                     <div className="bk-field">
-                      <input id={`bk-email-${ticketId}`} name="email" type="email" autoComplete="email" required placeholder=" " />
+                      <input id={`bk-email-${ticketId}`} name="email" type="email" autoComplete="email" required placeholder=" " value={email} onChange={(e) => setEmail(e.target.value)} />
                       <label htmlFor={`bk-email-${ticketId}`}>Email</label>
                     </div>
                     <FieldErr msg={fieldErrors['customer.email']} />
                     <div className="bk-field">
-                      <input id={`bk-phone-${ticketId}`} name="phone" type="tel" inputMode="numeric" autoComplete="tel" required pattern="[0-9+ ]{10,15}" placeholder=" " />
+                      <input id={`bk-phone-${ticketId}`} name="phone" type="tel" inputMode="numeric" autoComplete="tel" required pattern="[0-9+ ]{10,15}" placeholder=" " value={phone} onChange={(e) => setPhone(e.target.value)} />
                       <label htmlFor={`bk-phone-${ticketId}`}>Phone</label>
                     </div>
                     <FieldErr msg={fieldErrors['customer.phone']} />
@@ -412,8 +448,8 @@ export function BuyButton({ ticketId, name, unitPrice, currency, maxQuantity, re
                       </p>
                       <LimeButton
                         type="submit"
-                        label={phase === 'working' ? 'Processing…' : soldOut ? 'Sold out' : 'Pay now'}
-                        disabled={!canPay}
+                        label={authing ? 'Logging in…' : phase === 'working' ? 'Processing…' : soldOut ? 'Sold out' : guest ? 'Pay now' : 'Log in & pay'}
+                        disabled={!canPay || authing}
                       />
                     </div>
                   </div>
