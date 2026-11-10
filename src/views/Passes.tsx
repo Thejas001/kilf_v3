@@ -45,9 +45,9 @@ export async function Passes({ lang }: Props) {
           id: t.id,
           data: {
             name: t.name,
-            audience: t.ticketType?.replace(/_/g, ' ').toLowerCase() ?? match?.data.audience ?? '',
-            description: t.description ?? match?.data.description ?? '',
-            includes: match?.data.includes ?? [],
+            audience: match?.data.audience || (t.ticketType ? t.ticketType.replace(/_/g, ' ').toLowerCase() : ''),
+            description: t.description?.trim() || match?.data.description || '',
+            includes: match?.data.includes?.length ? match.data.includes : (t.perks ?? []).filter((x) => x.trim().length > 3),
             highlighted: match?.data.highlighted ?? false,
             order: i,
             price: formatPrice(t.price, t.currency),

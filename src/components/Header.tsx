@@ -25,6 +25,7 @@ export function Header() {
     { href: '/about', label: t('nav.about') },
     { href: '/speakers', label: t('nav.speakers') },
     { href: '/khasak', label: t('nav.theatre') },
+    { href: '/passes', label: t('nav.passes') },
     { href: '/visit', label: t('nav.visit') },
   ];
   // Malayalam labels are longer, so the full nav needs more room.

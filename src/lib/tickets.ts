@@ -12,6 +12,7 @@ const ticketSchema = z.object({
   availableQuantity: z.number().nullish(),
   salesStart: z.string().nullish(),
   salesEnd: z.string().nullish(),
+  perks: z.array(z.string()).nullish(),
 });
 const responseSchema = z.object({ success: z.boolean(), data: z.array(ticketSchema) });
 
