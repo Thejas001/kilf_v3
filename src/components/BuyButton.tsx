@@ -9,18 +9,16 @@ import {
   confirmPayment,
   createBooking,
   getQuote,
-  getShowSessions,
   loadRazorpay,
   openCheckout,
   type Attendee,
   type ConfirmedBooking,
   type CreatedBooking,
   type Customer,
-  type ShowSession,
   type TicketRequirements,
   type Quote,
 } from '@/lib/bookings';
-import { loadSession, requireLogin, updateProfile, type Guest } from '@/lib/auth';
+import { loadSession, requireLogin, type Guest } from '@/lib/auth';
 import { useGuest } from '@/lib/useGuest';
 import { rememberBooking } from '@/lib/myBookings';
 import { localizePath, parsePath } from '@/i18n/ui';
@@ -32,13 +30,10 @@ interface Props {
   unitPrice: number;
   currency: string;
   maxQuantity?: number;
+  /** Still passed by PassCard; the booking window no longer asks for per-ticket extras. */
   requirements?: TicketRequirements;
 }
 
-const NO_REQS: TicketRequirements = { dateOfBirth: false, date: false, showSession: false };
-const inputCls = 'w-full rounded-xl border border-line bg-white px-3 py-2.5 font-normal';
-/** The booking API rejects customer phones shorter than this. */
-const validPhone = (p: string) => /^[0-9+ ]{6,15}$/.test(p.trim());
 const LOGIN_REASON = 'Log in to book your tickets. We’ll take you straight to ticket selection.';
 
 type Phase = 'form' | 'working' | 'done';
@@ -48,7 +43,7 @@ type Phase = 'form' | 'working' | 'done';
  * The modal never opens for a signed-out visitor: Buy asks them to log in first and,
  * on success, opens ticket selection automatically. Buyer details come from the account.
  */
-export function BuyButton({ ticketId, name, unitPrice, currency, maxQuantity, requirements = NO_REQS }: Props) {
+export function BuyButton({ ticketId, name, unitPrice, currency, maxQuantity }: Props) {
   const [open, setOpen] = useState(false);
   const [opening, setOpening] = useState(false);
   const [phase, setPhase] = useState<Phase>('form');
@@ -59,10 +54,6 @@ export function BuyButton({ ticketId, name, unitPrice, currency, maxQuantity, re
   const [quote, setQuote] = useState<Quote | null>(null);
   const [quoting, setQuoting] = useState(false);
   const [quoteError, setQuoteError] = useState('');
-  const [phone, setPhone] = useState('');
-  const [visitDate, setVisitDate] = useState('');
-  const [sessionId, setSessionId] = useState('');
-  const [sessions, setSessions] = useState<ShowSession[] | null>(null);
   const guest = useGuest();
   const profileHref = localizePath('/profile', parsePath(usePathname()).lang);
   const dialog = useRef<HTMLDialogElement>(null);
@@ -78,10 +69,6 @@ export function BuyButton({ ticketId, name, unitPrice, currency, maxQuantity, re
   useEffect(() => {
     if (open && guest === null && phase !== 'working') setOpen(false);
   }, [open, guest, phase]);
-
-  useEffect(() => {
-    if (open && requirements.showSession && sessions === null) getShowSessions(ticketId).then(setSessions);
-  }, [open, requirements.showSession, sessions, ticketId]);
 
   const available = quote?.availableQuantity ?? maxQuantity;
   const max = Math.max(1, Math.min(MAX_PER_BOOKING, available ?? MAX_PER_BOOKING));
@@ -145,15 +132,11 @@ export function BuyButton({ ticketId, name, unitPrice, currency, maxQuantity, re
       setPhase('form');
       setResult(null);
       setQty(1);
-      setVisitDate('');
-      setSessionId('');
       held.current = null;
     }
     setError('');
   };
 
-  const accountPhone = guest?.phone?.trim() || '';
-  const needPhone = !validPhone(accountPhone);
 
   async function book(g: Guest, customer: Customer, attendees: Attendee[]): Promise<CreatedBooking> {
     const key = JSON.stringify([g.id, qty, attendees]);
@@ -173,35 +156,31 @@ export function BuyButton({ ticketId, name, unitPrice, currency, maxQuantity, re
     try {
       let g = guest ?? (await requireLogin(LOGIN_REASON));
       if (!g) throw new Error('Log in to continue.');
-      const buyerPhone = needPhone ? phone.trim() : accountPhone;
-      if (!validPhone(buyerPhone)) throw new Error('Enter a valid phone number (6–15 digits).');
-      const attendeesFor = (who: Guest): Attendee[] =>
-        Array.from({ length: qty }, () => {
-          const a: Attendee = { name: who.name };
-          if (requirements.date) a.validDate = visitDate;
-          if (requirements.showSession) a.showSessionId = sessionId.trim();
-          return a;
-        });
+      // Everything comes from the account: no extra questions in the booking window.
+      const customerOf = (who: Guest): Customer => {
+        const c: Customer = { name: who.name, email: who.email };
+        const p = who.phone?.trim();
+        if (p) c.phone = p;
+        return c;
+      };
+      const attendeesFor = (who: Guest): Attendee[] => Array.from({ length: qty }, () => ({ name: who.name }));
 
       if (!(await loadRazorpay())) throw new Error('Could not load the payment window. Check your connection and try again.');
 
       let created: CreatedBooking;
       try {
-        created = await book(g, { name: g.name, email: g.email, phone: buyerPhone }, attendeesFor(g));
+        created = await book(g, customerOf(g), attendeesFor(g));
       } catch (err) {
         if (!(err instanceof ApiError && err.status === 401)) throw err;
         // Session expired and could not be refreshed: log in again and retry once with the same selection.
         g = await requireLogin('Your session expired. Log in again to finish your booking.');
         if (!g) throw new Error('Your session expired. Log in again to finish your booking.');
-        created = await book(g, { name: g.name, email: g.email, phone: buyerPhone }, attendeesFor(g));
+        created = await book(g, customerOf(g), attendeesFor(g));
       }
-      // Remember a phone typed here so the guest isn't asked again (best effort).
-      if (needPhone) updateProfile({ name: g.name, phone: buyerPhone }).catch(() => {});
-
       setPaying(true);
       let paid: boolean;
       try {
-        paid = await openCheckout(created.payment, { description: `${name} × ${qty}`, customer: { name: g.name, email: g.email, phone: buyerPhone } });
+        paid = await openCheckout(created.payment, { description: `${name} × ${qty}`, customer: customerOf(g) });
       } finally {
         setPaying(false);
       }
@@ -324,51 +303,6 @@ export function BuyButton({ ticketId, name, unitPrice, currency, maxQuantity, re
                       <span className="font-semibold">{quote && !quoting ? money(quote.subtotalAmount) : fallback ? money(unitPrice * qty) : <Skel w="w-14" />}</span>
                     </p>
                   </div>
-
-                  {/* Only what the ticket itself needs: never name/email again. */}
-                  {(requirements.date || requirements.showSession || needPhone) && (
-                    <div className="mt-5 grid gap-3">
-                      {requirements.date && (
-                        <label className="grid gap-1 text-sm font-semibold">
-                          Day of visit
-                          <input type="date" required className={inputCls} value={visitDate} onChange={(e) => setVisitDate(e.target.value)} />
-                        </label>
-                      )}
-                      {requirements.showSession && (
-                        <label className="grid gap-1 text-sm font-semibold">
-                          Show session
-                          {sessions && sessions.length > 0 ? (
-                            <select required className={inputCls} value={sessionId} onChange={(e) => setSessionId(e.target.value)}>
-                              <option value="" disabled>
-                                Choose a session
-                              </option>
-                              {sessions.map((s) => (
-                                <option key={s.id} value={s.id}>
-                                  {s.label}
-                                </option>
-                              ))}
-                            </select>
-                          ) : (
-                            <input
-                              required
-                              pattern="[0-9a-fA-F\-]{36}"
-                              placeholder={sessions === null ? 'Loading sessions…' : 'Session ID'}
-                              className={inputCls}
-                              value={sessionId}
-                              onChange={(e) => setSessionId(e.target.value)}
-                            />
-                          )}
-                        </label>
-                      )}
-                      {needPhone && (
-                        <label className="grid gap-1 text-sm font-semibold">
-                          Phone for your tickets
-                          <input type="tel" inputMode="tel" autoComplete="tel" required pattern="[0-9+ ]{6,15}" className={inputCls} value={phone} onChange={(e) => setPhone(e.target.value)} />
-                          <span className="text-xs font-normal text-muted">Asked once; saved to your account.</span>
-                        </label>
-                      )}
-                    </div>
-                  )}
 
                   <dl className="mt-5 grid gap-1.5 text-sm">
                     <div className="flex justify-between text-muted">

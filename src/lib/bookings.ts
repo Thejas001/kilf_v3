@@ -7,7 +7,8 @@ const base = () => BACKEND_PROXY;
 export interface Customer {
   name: string;
   email: string;
-  phone: string;
+  /** Optional: sent only when the account has one. */
+  phone?: string;
 }
 
 export interface RazorpayPayment {
@@ -144,7 +145,7 @@ export function openCheckout(p: RazorpayPayment, opts: { description: string; cu
       currency: p.currency,
       name: 'KILF 2027',
       description: opts.description,
-      prefill: { name: opts.customer.name, email: opts.customer.email, contact: opts.customer.phone },
+      prefill: { name: opts.customer.name, email: opts.customer.email, contact: opts.customer.phone ?? "" },
       theme: { color: '#173ccb' },
       handler: () => resolve(true),
       modal: { ondismiss: () => resolve(false) },

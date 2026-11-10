@@ -13,7 +13,7 @@ import { localizePath, parsePath } from '@/i18n/ui';
 type View = 'login' | 'register' | 'forgot' | 'reset';
 
 const control =
-  'block w-full rounded-none border border-line bg-white py-3.5 text-base text-navy placeholder:text-muted/70 transition-colors hover:border-navy/40 focus:border-blue focus:outline-none focus:ring-2 focus:ring-blue/20 aria-[invalid=true]:border-coral-ink aria-[invalid=true]:ring-coral-ink/20';
+  'block w-full rounded-none border border-line bg-white py-3.5 text-base text-navy placeholder:text-muted/70 transition-colors [@media(max-height:820px)]:py-3 hover:border-navy/40 focus:border-blue focus:outline-none focus:ring-2 focus:ring-blue/20 aria-[invalid=true]:border-coral-ink aria-[invalid=true]:ring-coral-ink/20';
 
 const copy: Record<View, { eyebrow: string; title: string; lead: string }> = {
   login: { eyebrow: 'Guest login', title: 'Welcome back.', lead: 'Sign in to manage your passes and bookings.' },
@@ -187,7 +187,7 @@ export function AuthDialog() {
       onClick={(e) => e.target === dlg.current && closeDialog()}
       className="auth-dialog m-auto w-[min(100vw-1.5rem,56rem)] max-h-[calc(100dvh-1.5rem)] overflow-hidden border-0 bg-transparent p-0 text-navy backdrop:bg-ink/60 backdrop:backdrop-blur-sm"
     >
-      <div className="grid max-h-[calc(100dvh-1.5rem)] md:grid-cols-[0.82fr_1fr]">
+      <div className="grid max-h-[calc(100dvh-1.5rem)] grid-rows-[minmax(0,1fr)] md:grid-cols-[0.82fr_1fr]">
         {/* Brand panel */}
         <aside className="on-dark relative hidden flex-col justify-between overflow-hidden bg-footer p-9 text-white md:flex">
           <svg aria-hidden="true" viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice" className="absolute inset-0 size-full opacity-60">
@@ -207,7 +207,7 @@ export function AuthDialog() {
         </aside>
 
         {/* Form panel */}
-        <div className="relative overflow-y-auto bg-cream p-6 sm:p-9">
+        <div className="relative min-h-0 overflow-y-auto overscroll-contain bg-cream p-5 sm:p-9 [@media(max-height:820px)]:sm:py-6">
           <button
             type="button"
             onClick={closeDialog}
@@ -218,7 +218,7 @@ export function AuthDialog() {
           </button>
 
           {reason && (
-            <p className="mb-5 mr-12 flex items-start gap-2.5 border-l-4 border-lime-deep bg-lime/40 px-4 py-3 text-sm font-semibold text-navy">
+            <p className="mb-5 mr-12 flex items-start [@media(max-height:820px)]:mb-3 [@media(max-height:820px)]:py-2 gap-2.5 border-l-4 border-lime-deep bg-lime/40 px-4 py-3 text-sm font-semibold text-navy">
               <Icon name="lock" size={18} className="mt-0.5 shrink-0" />
               {reason}
             </p>
@@ -226,7 +226,7 @@ export function AuthDialog() {
 
           <form onSubmit={submit} noValidate className="pr-0 pt-1">
             <p className="eyebrow text-blue">{c.eyebrow}</p>
-            <h2 id="auth-title" className="display mt-2 pr-12 text-[2rem] text-navy sm:text-[2.35rem]">{c.title}</h2>
+            <h2 id="auth-title" className="display mt-2 pr-12 text-[1.75rem] text-navy sm:text-[2.35rem] [@media(max-height:820px)]:sm:text-[2rem]">{c.title}</h2>
             <p className="mt-2 text-[0.95rem] text-muted">{c.lead}</p>
 
             {(notice || formError) && (
@@ -235,7 +235,7 @@ export function AuthDialog() {
               </p>
             )}
 
-            <div className="mt-6 grid gap-4">
+            <div className="mt-6 grid gap-4 [@media(max-height:820px)]:mt-4 [@media(max-height:820px)]:gap-3">
               {view === 'register' && <TextField label="Full name" name="name" value={f.name} onChange={set('name')} autoComplete="name" error={errors.name} />}
               {view !== 'reset' && <TextField label="Email" name="email" type="email" value={f.email} onChange={set('email')} autoComplete="email" error={errors.email} />}
               {view === 'reset' && <TextField label="Reset token" name="token" value={f.token} onChange={set('token')} autoComplete="off" error={errors.token} />}
