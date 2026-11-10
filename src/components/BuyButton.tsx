@@ -17,6 +17,7 @@ import {
   type Customer,
   type TicketRequirements,
   type Quote,
+  type RazorpaySuccess,
 } from '@/lib/bookings';
 import { loadSession, requireLogin, type Guest } from '@/lib/auth';
 import { useGuest } from '@/lib/useGuest';
@@ -178,7 +179,7 @@ export function BuyButton({ ticketId, name, unitPrice, currency, maxQuantity }: 
         created = await book(g, customerOf(g), attendeesFor(g));
       }
       setPaying(true);
-      let paid: boolean;
+      let paid: RazorpaySuccess | null;
       try {
         paid = await openCheckout(created.payment, { description: `${name} × ${qty}`, customer: customerOf(g) });
       } finally {
@@ -190,7 +191,7 @@ export function BuyButton({ ticketId, name, unitPrice, currency, maxQuantity }: 
         return;
       }
       held.current = null;
-      setResult(await confirmPayment(created.booking.bookingNumber));
+      setResult(await confirmPayment(created.booking.bookingNumber, paid));
       setPhase('done');
     } catch (err) {
       if (err instanceof ApiError && err.errors.length) setError(err.errors.map((x) => x.message).join(' · '));

@@ -84,5 +84,7 @@ The login popup, Profile button and profile page are built. Three things need th
 - [ ] `GET /api/auth/bookings/:bookingNumber` (bearer token): one booking, 404 if it isn't this guest's.
 - [ ] `PATCH /api/auth/me` (bearer token) with `{ name, phone? }`: returns the updated guest. Also return `phone` from `GET /api/auth/me`.
 - [ ] `POST /api/bookings` now receives the guest's bearer token: link the booking to that guest so it shows in their history.
+- [ ] **Elite Pass**: turn off `requiresDate` and `requiresShowSession` on the ticket, or `POST /api/bookings` rejects it for missing the visit day and show session.
+- [ ] `POST /api/bookings`: make the buyer's `phone` optional. Today it rejects any booking without a phone of at least 6 characters, and new accounts have no phone.
 
 Until the booking routes exist, **My bookings** shows bookings made on that device (looked up with the account's email) and says so. Profile edits show "isn't available yet". See `src/lib/myBookings.ts` and `updateProfile` in `src/lib/auth.ts`.

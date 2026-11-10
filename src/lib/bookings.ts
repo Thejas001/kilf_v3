@@ -104,7 +104,15 @@ export async function getShowSessions(ticketId: string): Promise<ShowSession[]> 
     return [];
   }
 }
-export const confirmPayment = (bookingNumber: string) => call<ConfirmedBooking>(`/api/bookings/${encodeURIComponent(bookingNumber)}/confirm-payment`);
+/** What Razorpay Checkout hands back on success; the backend verifies the signature with its key secret. */
+export interface RazorpaySuccess {
+  razorpay_payment_id: string;
+  razorpay_order_id: string;
+  razorpay_signature: string;
+}
+
+export const confirmPayment = (bookingNumber: string, payment?: RazorpaySuccess) =>
+  call<ConfirmedBooking>(`/api/bookings/${encodeURIComponent(bookingNumber)}/confirm-payment`, payment);
 
 interface RazorpayOptions {
   key: string;
@@ -115,7 +123,7 @@ interface RazorpayOptions {
   description: string;
   prefill: { name: string; email: string; contact: string };
   theme: { color: string };
-  handler: () => void;
+  handler: (r: RazorpaySuccess) => void;
   modal: { ondismiss: () => void };
 }
 declare global {
@@ -135,8 +143,8 @@ export function loadRazorpay(): Promise<boolean> {
   });
 }
 
-/** Opens Razorpay Checkout. Resolves true on payment success, false if the user closes it; rejects on payment failure. */
-export function openCheckout(p: RazorpayPayment, opts: { description: string; customer: Customer }): Promise<boolean> {
+/** Opens Razorpay Checkout. Resolves with Razorpay's response on success, null if the user closes it; rejects on payment failure. */
+export function openCheckout(p: RazorpayPayment, opts: { description: string; customer: Customer }): Promise<RazorpaySuccess | null> {
   return new Promise((resolve, reject) => {
     const rzp = new window.Razorpay!({
       key: p.keyId,
@@ -147,8 +155,8 @@ export function openCheckout(p: RazorpayPayment, opts: { description: string; cu
       description: opts.description,
       prefill: { name: opts.customer.name, email: opts.customer.email, contact: opts.customer.phone ?? "" },
       theme: { color: '#173ccb' },
-      handler: () => resolve(true),
-      modal: { ondismiss: () => resolve(false) },
+      handler: (r) => resolve(r),
+      modal: { ondismiss: () => resolve(null) },
     });
     rzp.on('payment.failed', (r) => reject(new Error(r.error?.description || 'Payment failed.')));
     rzp.open();
