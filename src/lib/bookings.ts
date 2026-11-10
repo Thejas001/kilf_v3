@@ -30,6 +30,39 @@ export interface ConfirmedBooking {
   ticketInstances?: { ticketNumber: string; qrCode?: string; status: string }[];
 }
 
+/** One per ticket. The optional fields are sent only when the ticket requires them. */
+export interface Attendee {
+  name: string;
+  phone?: string;
+  /** YYYY-MM-DD, age-restricted tickets */
+  dateOfBirth?: string;
+  /** YYYY-MM-DD within the festival dates, day passes */
+  validDate?: string;
+  /** uuid, show/session tickets */
+  showSessionId?: string;
+}
+
+/** Which extra attendee fields a ticket needs, derived from the ticket object the API returns. */
+export interface TicketRequirements {
+  dateOfBirth: boolean;
+  date: boolean;
+  showSession: boolean;
+}
+
+export interface FieldError {
+  path: string;
+  message: string;
+}
+
+export class ApiError extends Error {
+  constructor(message: string, readonly status: number, readonly errors: FieldError[] = []) {
+    super(message);
+  }
+}
+
+/** Backend error paths look like `body.attendees.0.name`; drop the `body.` prefix to match form keys. */
+export const fieldKey = (path: string) => path.replace(/^body\./, '');
+
 async function call<T>(path: string, body?: unknown): Promise<T> {
   const res = await fetch(`${base()}${path}`, {
     method: 'POST',
@@ -37,11 +70,41 @@ async function call<T>(path: string, body?: unknown): Promise<T> {
     body: body ? JSON.stringify(body) : undefined,
   });
   const json = await res.json().catch(() => null);
-  if (!res.ok || !json?.success) throw new Error(json?.message || 'Something went wrong. Please try again.');
+  if (!res.ok || !json?.success) {
+    const errors: FieldError[] = Array.isArray(json?.errors)
+      ? json.errors
+          .filter((e: { message?: unknown }) => e && typeof e.message === 'string')
+          .map((e: { path?: unknown; message: string }) => ({ path: String(e.path ?? ''), message: e.message }))
+      : [];
+    throw new ApiError(json?.message || 'Something went wrong. Please try again.', res.status, errors);
+  }
   return json.data as T;
 }
 
-export const createBooking = (ticketId: string, quantity: number, customer: Customer) => call<CreatedBooking>('/api/bookings', { ticketId, quantity, customer });
+export const createBooking = (ticketId: string, quantity: number, attendees: Attendee[], customer: Customer) =>
+  call<CreatedBooking>('/api/bookings', { ticketId, quantity, attendees, customer });
+
+export interface ShowSession {
+  id: string;
+  label: string;
+}
+
+/** Show sessions a ticket can be booked for. Returns [] on any failure (the form then asks for a session id). */
+export async function getShowSessions(ticketId: string): Promise<ShowSession[]> {
+  try {
+    const res = await fetch(`${base()}/api/show-sessions?${new URLSearchParams({ ticketId })}`);
+    const json = await res.json().catch(() => null);
+    if (!res.ok || !json?.success || !Array.isArray(json.data)) return [];
+    return json.data.map((s: Record<string, unknown>) => {
+      const when = s.startTime ?? s.startsAt ?? s.date;
+      const title = String(s.name ?? s.title ?? (s.show as { title?: string } | undefined)?.title ?? 'Session');
+      const t = when ? new Date(String(when)) : null;
+      return { id: String(s.id), label: t && !isNaN(+t) ? `${title} · ${t.toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}` : title };
+    });
+  } catch {
+    return [];
+  }
+}
 export const confirmPayment = (bookingNumber: string) => call<ConfirmedBooking>(`/api/bookings/${encodeURIComponent(bookingNumber)}/confirm-payment`);
 
 interface RazorpayOptions {

@@ -13,6 +13,10 @@ const ticketSchema = z.object({
   salesStart: z.string().nullish(),
   salesEnd: z.string().nullish(),
   perks: z.array(z.string()).nullish(),
+  requiresDate: z.boolean().nullish(),
+  requiresShowSession: z.boolean().nullish(),
+  minAge: z.number().nullish(),
+  maxAge: z.number().nullish(),
 });
 const responseSchema = z.object({ success: z.boolean(), data: z.array(ticketSchema) });
 

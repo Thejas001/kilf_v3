@@ -53,7 +53,7 @@ export async function Passes({ lang }: Props) {
             price: formatPrice(t.price, t.currency),
             priceNote: t.availableQuantity != null && onSale ? `${t.availableQuantity} left` : match?.data.priceNote,
             buyUrl: onSale ? match?.data.buyUrl : undefined,
-            checkout: onSale ? { ticketId: t.id, unitPrice: Number(t.price), currency: t.currency, maxQuantity: t.availableQuantity ?? undefined } : undefined,
+            checkout: onSale ? { ticketId: t.id, unitPrice: Number(t.price), currency: t.currency, maxQuantity: t.availableQuantity ?? undefined, requirements: { date: !!t.requiresDate, showSession: !!t.requiresShowSession, dateOfBirth: t.minAge != null || t.maxAge != null } } : undefined,
           },
         };
       })

@@ -4,13 +4,19 @@ import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { createPortal } from 'react-dom';
 import { LimeButton } from '@/components/LimeButton';
 import {
+  ApiError,
   MAX_PER_BOOKING,
   confirmPayment,
   createBooking,
+  fieldKey,
   getQuote,
+  getShowSessions,
   loadRazorpay,
   openCheckout,
+  type Attendee,
   type ConfirmedBooking,
+  type ShowSession,
+  type TicketRequirements,
   type Quote,
 } from '@/lib/bookings';
 
@@ -20,11 +26,19 @@ interface Props {
   unitPrice: number;
   currency: string;
   maxQuantity?: number;
+  requirements?: TicketRequirements;
 }
+
+/** Error paths that have an input in the form; anything else is shown in the summary alert. */
+const PLACED = /^(customer\.(name|email|phone)|attendees\.\d+\.(name|phone|dateOfBirth|validDate|showSessionId))$/;
+
+const NO_REQS: TicketRequirements = { dateOfBirth: false, date: false, showSession: false };
+const blankAttendee = (): Attendee => ({ name: '', phone: '' });
+const inputCls = 'rounded-xl border border-line bg-white px-3 py-2 font-normal';
 
 type Phase = 'form' | 'working' | 'done';
 
-export function BuyButton({ ticketId, name, unitPrice, currency, maxQuantity }: Props) {
+export function BuyButton({ ticketId, name, unitPrice, currency, maxQuantity, requirements = NO_REQS }: Props) {
   const [open, setOpen] = useState(false);
   const [phase, setPhase] = useState<Phase>('form');
   const [qty, setQty] = useState(1);
@@ -34,6 +48,31 @@ export function BuyButton({ ticketId, name, unitPrice, currency, maxQuantity }: 
   const [quote, setQuote] = useState<Quote | null>(null);
   const [quoting, setQuoting] = useState(false);
   const [quoteError, setQuoteError] = useState('');
+  const [customerName, setCustomerName] = useState('');
+  const [attendees, setAttendees] = useState<Attendee[]>([blankAttendee()]);
+  // The first attendee's name follows the customer name until the user edits it.
+  const [firstNameEdited, setFirstNameEdited] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [sessions, setSessions] = useState<ShowSession[] | null>(null);
+
+  // Keep exactly one attendee block per ticket.
+  useEffect(() => {
+    setAttendees((a) => (a.length === qty ? a : a.length > qty ? a.slice(0, qty) : [...a, ...Array.from({ length: qty - a.length }, blankAttendee)]));
+  }, [qty]);
+
+  useEffect(() => {
+    if (open && requirements.showSession && sessions === null) getShowSessions(ticketId).then(setSessions);
+  }, [open, requirements.showSession, sessions, ticketId]);
+
+  const setAttendee = (i: number, patch: Partial<Attendee>) => {
+    setAttendees((a) => a.map((x, j) => (j === i ? { ...x, ...patch } : x)));
+    setFieldErrors((e) => {
+      const next = { ...e };
+      for (const k of Object.keys(patch)) delete next[`attendees.${i}.${k}`];
+      return next;
+    });
+  };
+  const shownAttendees = attendees.map((a, i) => (i === 0 && !firstNameEdited ? { ...a, name: customerName } : a));
   const dialog = useRef<HTMLDialogElement>(null);
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
@@ -86,7 +125,11 @@ export function BuyButton({ ticketId, name, unitPrice, currency, maxQuantity }: 
       setPhase('form');
       setResult(null);
       setQty(1);
+      setAttendees([blankAttendee()]);
+      setFirstNameEdited(false);
+      setCustomerName('');
     }
+    setFieldErrors({});
     setError('');
   };
 
@@ -94,11 +137,20 @@ export function BuyButton({ ticketId, name, unitPrice, currency, maxQuantity }: 
     e.preventDefault();
     const f = new FormData(e.currentTarget);
     const customer = { name: String(f.get('name')).trim(), email: String(f.get('email')).trim(), phone: String(f.get('phone')).trim() };
+    const list: Attendee[] = shownAttendees.slice(0, qty).map((a) => {
+      const out: Attendee = { name: a.name.trim() };
+      if (a.phone?.trim()) out.phone = a.phone.trim();
+      if (requirements.dateOfBirth && a.dateOfBirth) out.dateOfBirth = a.dateOfBirth;
+      if (requirements.date && a.validDate) out.validDate = a.validDate;
+      if (requirements.showSession && a.showSessionId?.trim()) out.showSessionId = a.showSessionId.trim();
+      return out;
+    });
     setError('');
+    setFieldErrors({});
     setPhase('working');
     try {
       if (!(await loadRazorpay())) throw new Error('Could not load the payment window. Check your connection and try again.');
-      const { booking, payment } = await createBooking(ticketId, qty, customer);
+      const { booking, payment } = await createBooking(ticketId, qty, list, customer);
       setPaying(true);
       let paid: boolean;
       try {
@@ -114,7 +166,17 @@ export function BuyButton({ ticketId, name, unitPrice, currency, maxQuantity }: 
       setResult(await confirmPayment(booking.bookingNumber));
       setPhase('done');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
+      if (err instanceof ApiError && err.errors.length) {
+        const map: Record<string, string> = {};
+        const unplaced: string[] = [];
+        for (const e of err.errors) {
+          const k = fieldKey(e.path);
+          map[k] = e.message;
+          if (!PLACED.test(k)) unplaced.push(e.path ? `${k}: ${e.message}` : e.message);
+        }
+        setFieldErrors(map);
+        setError(unplaced.length ? unplaced.join(' · ') : 'Please fix the highlighted fields.');
+      } else setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
       setPhase('form');
     }
   }
@@ -196,17 +258,99 @@ export function BuyButton({ ticketId, name, unitPrice, currency, maxQuantity }: 
                   <div className="bk-stagger grid gap-3.5 px-7 pb-6 pt-7 sm:px-9">
                     <p className="text-[0.72rem] font-bold uppercase tracking-[0.18em] text-muted">Your details</p>
                     <div className="bk-field">
-                      <input id={`bk-name-${ticketId}`} name="name" autoComplete="name" required minLength={2} placeholder=" " />
+                      <input id={`bk-name-${ticketId}`} name="name" autoComplete="name" required minLength={2} placeholder=" " value={customerName} onChange={(e) => setCustomerName(e.target.value)} />
                       <label htmlFor={`bk-name-${ticketId}`}>Full name</label>
                     </div>
+                    <FieldErr msg={fieldErrors['customer.name']} />
                     <div className="bk-field">
                       <input id={`bk-email-${ticketId}`} name="email" type="email" autoComplete="email" required placeholder=" " />
                       <label htmlFor={`bk-email-${ticketId}`}>Email</label>
                     </div>
+                    <FieldErr msg={fieldErrors['customer.email']} />
                     <div className="bk-field">
                       <input id={`bk-phone-${ticketId}`} name="phone" type="tel" inputMode="numeric" autoComplete="tel" required pattern="[0-9+ ]{10,15}" placeholder=" " />
                       <label htmlFor={`bk-phone-${ticketId}`}>Phone</label>
                     </div>
+                    <FieldErr msg={fieldErrors['customer.phone']} />
+
+                    {shownAttendees.map((a, i) => {
+                      const id = (f: string) => `bk-a${i}-${f}-${ticketId}`;
+                      const err = (f: string) => fieldErrors[`attendees.${i}.${f}`];
+                      return (
+                        <fieldset key={i} className="mt-3 grid gap-3 rounded-2xl border border-line bg-white/60 p-4">
+                          <legend className="px-1 text-[0.72rem] font-bold uppercase tracking-[0.18em] text-muted">Attendee {i + 1}</legend>
+                          <div className="bk-field">
+                            <input
+                              id={id('name')}
+                              required
+                              minLength={2}
+                              placeholder=" "
+                              value={a.name}
+                              aria-invalid={!!err('name')}
+                              onChange={(e) => {
+                                if (i === 0) setFirstNameEdited(true);
+                                setAttendee(i, { name: e.target.value });
+                              }}
+                            />
+                            <label htmlFor={id('name')}>Name</label>
+                          </div>
+                          <FieldErr msg={err('name')} />
+                          <div className="bk-field">
+                            <input id={id('phone')} type="tel" inputMode="tel" pattern="[0-9+ ]{10,15}" placeholder=" " value={a.phone ?? ''} aria-invalid={!!err('phone')} onChange={(e) => setAttendee(i, { phone: e.target.value })} />
+                            <label htmlFor={id('phone')}>Phone (optional)</label>
+                          </div>
+                          <FieldErr msg={err('phone')} />
+                          {requirements.dateOfBirth && (
+                            <>
+                              <label className="grid gap-1 text-sm font-semibold">
+                                Date of birth
+                                <input type="date" required className={inputCls} value={a.dateOfBirth ?? ''} aria-invalid={!!err('dateOfBirth')} onChange={(e) => setAttendee(i, { dateOfBirth: e.target.value })} />
+                              </label>
+                              <FieldErr msg={err('dateOfBirth')} />
+                            </>
+                          )}
+                          {requirements.date && (
+                            <>
+                              <label className="grid gap-1 text-sm font-semibold">
+                                Day of visit
+                                <input type="date" required className={inputCls} value={a.validDate ?? ''} aria-invalid={!!err('validDate')} onChange={(e) => setAttendee(i, { validDate: e.target.value })} />
+                              </label>
+                              <FieldErr msg={err('validDate')} />
+                            </>
+                          )}
+                          {requirements.showSession && (
+                            <>
+                              <label className="grid gap-1 text-sm font-semibold">
+                                Show session
+                                {sessions && sessions.length > 0 ? (
+                                  <select required className={inputCls} value={a.showSessionId ?? ''} aria-invalid={!!err('showSessionId')} onChange={(e) => setAttendee(i, { showSessionId: e.target.value })}>
+                                    <option value="" disabled>
+                                      Choose a session
+                                    </option>
+                                    {sessions.map((s) => (
+                                      <option key={s.id} value={s.id}>
+                                        {s.label}
+                                      </option>
+                                    ))}
+                                  </select>
+                                ) : (
+                                  <input
+                                    required
+                                    pattern="[0-9a-fA-F\-]{36}"
+                                    placeholder={sessions === null ? 'Loading sessions…' : 'Session ID'}
+                                    className={inputCls}
+                                    value={a.showSessionId ?? ''}
+                                    aria-invalid={!!err('showSessionId')}
+                                    onChange={(e) => setAttendee(i, { showSessionId: e.target.value })}
+                                  />
+                                )}
+                              </label>
+                              <FieldErr msg={err('showSessionId')} />
+                            </>
+                          )}
+                        </fieldset>
+                      );
+                    })}
                     {error && (
                       <p role="alert" className="rounded-xl bg-coral-soft px-4 py-3 text-sm font-semibold text-coral-ink">
                         {error}
@@ -215,7 +359,7 @@ export function BuyButton({ ticketId, name, unitPrice, currency, maxQuantity }: 
                   </div>
 
                   {/* Bottom: quantity + price + pay */}
-                  <div className="sticky bottom-0 z-10 border-t border-line bg-white/90 px-7 pb-6 pt-5 backdrop-blur-md shadow-[0_-12px_30px_-18px_rgba(16,27,70,0.35)] sm:px-9">
+                  <div className="border-t border-line bg-white px-7 pb-6 pt-5 sm:px-9">
                     <div className="flex items-center justify-between gap-4">
                       <div>
                         <p className="text-sm font-semibold">Tickets</p>
@@ -248,7 +392,7 @@ export function BuyButton({ ticketId, name, unitPrice, currency, maxQuantity }: 
                       </div>
                     </dl>
 
-                    {fallback && <p className="mt-3 text-xs text-muted">Live pricing is unavailable right now. The final amount, including GST, is shown at payment.</p>}
+                    {fallback && <p className="mt-3 text-xs text-muted">Price unavailable right now. The final amount, including GST, is shown at payment.</p>}
 
                     <div className="mt-4 flex items-center justify-between gap-4 border-t border-dashed border-line pt-4">
                       <p>
@@ -281,4 +425,12 @@ export function BuyButton({ ticketId, name, unitPrice, currency, maxQuantity }: 
         )}
     </>
   );
+}
+
+function FieldErr({ msg }: { msg?: string }) {
+  return msg ? (
+    <p role="alert" className="-mt-1.5 text-xs font-semibold text-coral-ink">
+      {msg}
+    </p>
+  ) : null;
 }
