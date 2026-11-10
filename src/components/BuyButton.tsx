@@ -120,7 +120,9 @@ export function BuyButton({ ticketId, name, unitPrice, currency, maxQuantity }: 
   }
 
   const soldOut = quote ? !quote.isAvailable : false;
-  const canPay = phase === 'form' && !quoting && !!quote && !soldOut;
+  // If the quote endpoint is unavailable, show an estimate from the listed price; the booking API still charges the real amount.
+  const fallback = !quote && !!quoteError && !quoting;
+  const canPay = phase === 'form' && !quoting && (!!quote || fallback) && !soldOut;
   const gstPct = quote ? `${+(quote.gstRate > 1 ? quote.gstRate : quote.gstRate * 100).toFixed(2)}%` : '';
   const step = (d: number) => setQty((q) => Math.max(1, Math.min(max, q + d)));
   const stepBtn =
@@ -140,7 +142,7 @@ export function BuyButton({ ticketId, name, unitPrice, currency, maxQuantity }: 
             className="bk-dialog m-auto w-[min(34rem,calc(100vw-1.5rem))] text-navy"
             aria-labelledby={`bk-title-${ticketId}`}
           >
-            <div className="bk-card relative flex max-h-[min(92vh,52rem)] flex-col overflow-hidden rounded-[28px] bg-cream shadow-[0_40px_120px_-20px_rgba(16,27,70,0.6)] ring-1 ring-white/40">
+            <div className="bk-card relative max-h-[min(94vh,56rem)] overflow-y-auto overscroll-contain rounded-[28px] bg-cream shadow-[0_40px_120px_-20px_rgba(16,27,70,0.6)] ring-1 ring-white/40">
               {/* Header */}
               <header className="relative shrink-0 overflow-hidden bg-navy-deep px-7 pb-7 pt-6 text-white sm:px-9">
                 <span className="bk-orb -left-10 -top-16 size-48 bg-blue-bright" />
@@ -170,7 +172,7 @@ export function BuyButton({ ticketId, name, unitPrice, currency, maxQuantity }: 
               </header>
 
               {phase === 'done' && result ? (
-                <div className="bk-stagger overflow-y-auto px-7 py-7 sm:px-9">
+                <div className="bk-stagger px-7 py-7 sm:px-9">
                   <p className="text-muted">{result.status === 'CONFIRMED' ? 'Payment received.' : 'Payment is being verified; your tickets will be emailed.'} Booking number</p>
                   <p className="numeral mt-1 text-3xl text-blue-bright">{result.bookingNumber}</p>
                   <ul className="mt-6 grid gap-4 sm:grid-cols-2">
@@ -189,9 +191,9 @@ export function BuyButton({ ticketId, name, unitPrice, currency, maxQuantity }: 
                   </div>
                 </div>
               ) : (
-                <form onSubmit={submit} className="flex min-h-0 flex-1 flex-col">
+                <form onSubmit={submit}>
                   {/* Details */}
-                  <div className="bk-stagger grid gap-3.5 overflow-y-auto px-7 py-7 sm:px-9">
+                  <div className="bk-stagger grid gap-3.5 px-7 pb-6 pt-7 sm:px-9">
                     <p className="text-[0.72rem] font-bold uppercase tracking-[0.18em] text-muted">Your details</p>
                     <div className="bk-field">
                       <input id={`bk-name-${ticketId}`} name="name" autoComplete="name" required minLength={2} placeholder=" " />
@@ -213,7 +215,7 @@ export function BuyButton({ ticketId, name, unitPrice, currency, maxQuantity }: 
                   </div>
 
                   {/* Bottom: quantity + price + pay */}
-                  <div className="shrink-0 border-t border-line bg-white/80 px-7 pb-7 pt-5 backdrop-blur sm:px-9">
+                  <div className="sticky bottom-0 z-10 border-t border-line bg-white/90 px-7 pb-6 pt-5 backdrop-blur-md shadow-[0_-12px_30px_-18px_rgba(16,27,70,0.35)] sm:px-9">
                     <div className="flex items-center justify-between gap-4">
                       <div>
                         <p className="text-sm font-semibold">Tickets</p>
@@ -238,19 +240,15 @@ export function BuyButton({ ticketId, name, unitPrice, currency, maxQuantity }: 
                     <dl className="mt-5 grid gap-1.5 text-sm">
                       <div className="flex justify-between text-muted">
                         <dt>Subtotal</dt>
-                        <dd>{quote && !quoting ? money(quote.subtotalAmount) : <Skel w="w-16" />}</dd>
+                        <dd>{quote && !quoting ? money(quote.subtotalAmount) : fallback ? money(unitPrice * qty) : <Skel w="w-16" />}</dd>
                       </div>
                       <div className="flex justify-between text-muted">
                         <dt>GST{gstPct && ` (${gstPct})`}</dt>
-                        <dd>{quote && !quoting ? money(quote.gstAmount) : <Skel w="w-12" />}</dd>
+                        <dd>{quote && !quoting ? money(quote.gstAmount) : fallback ? 'Added at checkout' : <Skel w="w-12" />}</dd>
                       </div>
                     </dl>
 
-                    {quoteError && (
-                      <p role="alert" className="mt-3 text-sm font-semibold text-coral-ink">
-                        {quoteError}
-                      </p>
-                    )}
+                    {fallback && <p className="mt-3 text-xs text-muted">Live pricing is unavailable right now. The final amount, including GST, is shown at payment.</p>}
 
                     <div className="mt-4 flex items-center justify-between gap-4 border-t border-dashed border-line pt-4">
                       <p>
@@ -258,6 +256,11 @@ export function BuyButton({ ticketId, name, unitPrice, currency, maxQuantity }: 
                         {quote && !quoting ? (
                           <span key={quote.totalAmount} className="bk-num numeral text-3xl text-blue-bright">
                             {money(quote.totalAmount)}
+                          </span>
+                        ) : fallback ? (
+                          <span className="numeral text-3xl text-blue-bright">
+                            {fmt(unitPrice * qty)}
+                            <span className="ml-1.5 align-middle text-sm font-semibold text-muted">+ GST</span>
                           </span>
                         ) : (
                           <span className="bk-shimmer mt-1 block h-8 w-28" />
