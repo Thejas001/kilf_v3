@@ -92,3 +92,42 @@ export function openCheckout(p: RazorpayPayment, opts: { description: string; cu
     rzp.open();
   });
 }
+
+/** Max tickets the API accepts in one booking/quote request. */
+export const MAX_PER_BOOKING = 20;
+
+export interface Quote {
+  unitPrice: number;
+  gstRate: number;
+  subtotalAmount: number;
+  gstAmount: number;
+  totalAmount: number;
+  currency: string;
+  availableQuantity: number | null;
+  isAvailable: boolean;
+}
+
+type RawQuote = { [K in keyof Quote]: Quote[K] extends number ? number | string : Quote[K] };
+
+/** Server-side price for `quantity` tickets: GST added on top, matching what the booking will charge. */
+export async function getQuote(ticketId: string, quantity: number, signal?: AbortSignal): Promise<Quote> {
+  const res = await fetch(`${base()}/api/bookings/quote`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ticketId, quantity }),
+    signal,
+  });
+  const json = await res.json().catch(() => null);
+  if (!res.ok || !json?.success) throw new Error(json?.message || 'Could not fetch the price.');
+  const q = json.data as RawQuote;
+  return {
+    unitPrice: Number(q.unitPrice),
+    gstRate: Number(q.gstRate),
+    subtotalAmount: Number(q.subtotalAmount),
+    gstAmount: Number(q.gstAmount),
+    totalAmount: Number(q.totalAmount),
+    currency: q.currency || 'INR',
+    availableQuantity: q.availableQuantity == null ? null : Number(q.availableQuantity),
+    isAvailable: Boolean(q.isAvailable),
+  };
+}
