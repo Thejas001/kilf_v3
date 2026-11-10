@@ -1,0 +1,8 @@
+[
+  { "id": "midnight", "order": 1, "title": "The midnight chapter", "line": "As 2026 slips away, the lake falls quiet and listens." },
+  { "id": "masters", "order": 2, "title": "Masters, unscripted", "line": "Legends of Malayalam literature, candid and face to face." },
+  { "id": "page-frame", "order": 3, "title": "Between the page and the frame", "line": "Filmmakers, lyricists and writers on adaptation." },
+  { "id": "questions", "order": 4, "title": "Questions Kerala keeps asking", "line": "History, faith, society, media." },
+  { "id": "loudest", "order": 5, "title": "The loudest corner", "line": "Poetry slams, open mics, young voices." },
+  { "id": "taste", "order": 6, "title": "Stories you can taste", "line": "Books by day. Food, music and the lake by night." }
+]

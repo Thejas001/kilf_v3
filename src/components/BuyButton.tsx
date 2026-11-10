@@ -8,18 +8,19 @@ import {
   MAX_PER_BOOKING,
   confirmPayment,
   createBooking,
-  fieldKey,
   getQuote,
   getShowSessions,
   loadRazorpay,
   openCheckout,
   type Attendee,
   type ConfirmedBooking,
+  type CreatedBooking,
+  type Customer,
   type ShowSession,
   type TicketRequirements,
   type Quote,
 } from '@/lib/bookings';
-import { requireLogin } from '@/lib/auth';
+import { loadSession, requireLogin, updateProfile, type Guest } from '@/lib/auth';
 import { useGuest } from '@/lib/useGuest';
 import { rememberBooking } from '@/lib/myBookings';
 import { localizePath, parsePath } from '@/i18n/ui';
@@ -34,17 +35,22 @@ interface Props {
   requirements?: TicketRequirements;
 }
 
-/** Error paths that have an input in the form; anything else is shown in the summary alert. */
-const PLACED = /^(customer\.(name|email|phone)|attendees\.\d+\.(name|phone|dateOfBirth|validDate|showSessionId))$/;
-
 const NO_REQS: TicketRequirements = { dateOfBirth: false, date: false, showSession: false };
-const blankAttendee = (): Attendee => ({ name: '', phone: '' });
-const inputCls = 'rounded-xl border border-line bg-white px-3 py-2 font-normal';
+const inputCls = 'w-full rounded-xl border border-line bg-white px-3 py-2.5 font-normal';
+/** The booking API rejects customer phones shorter than this. */
+const validPhone = (p: string) => /^[0-9+ ]{6,15}$/.test(p.trim());
+const LOGIN_REASON = 'Log in to book your tickets. We’ll take you straight to ticket selection.';
 
 type Phase = 'form' | 'working' | 'done';
 
+/**
+ * Buy → (log in if needed) → choose quantity → Book now → Razorpay.
+ * The modal never opens for a signed-out visitor: Buy asks them to log in first and,
+ * on success, opens ticket selection automatically. Buyer details come from the account.
+ */
 export function BuyButton({ ticketId, name, unitPrice, currency, maxQuantity, requirements = NO_REQS }: Props) {
   const [open, setOpen] = useState(false);
+  const [opening, setOpening] = useState(false);
   const [phase, setPhase] = useState<Phase>('form');
   const [qty, setQty] = useState(1);
   const [error, setError] = useState('');
@@ -53,47 +59,29 @@ export function BuyButton({ ticketId, name, unitPrice, currency, maxQuantity, re
   const [quote, setQuote] = useState<Quote | null>(null);
   const [quoting, setQuoting] = useState(false);
   const [quoteError, setQuoteError] = useState('');
-  const [customerName, setCustomerName] = useState('');
-  const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
-  const [authing, setAuthing] = useState(false);
+  const [visitDate, setVisitDate] = useState('');
+  const [sessionId, setSessionId] = useState('');
+  const [sessions, setSessions] = useState<ShowSession[] | null>(null);
   const guest = useGuest();
   const profileHref = localizePath('/profile', parsePath(usePathname()).lang);
+  const dialog = useRef<HTMLDialogElement>(null);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
-  // Fill in what the account already knows, without overwriting anything typed.
-  useEffect(() => {
-    if (!open || !guest) return;
-    setCustomerName((v) => v || guest.name);
-    setEmail((v) => v || guest.email);
-    if (guest.phone) setPhone((v) => v || guest.phone || '');
-  }, [open, guest]);
-  const [attendees, setAttendees] = useState<Attendee[]>([blankAttendee()]);
-  // The first attendee's name follows the customer name until the user edits it.
-  const [firstNameEdited, setFirstNameEdited] = useState(false);
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
-  const [sessions, setSessions] = useState<ShowSession[] | null>(null);
+  /** Synchronous lock: a double click can't start two bookings before React re-renders. */
+  const busy = useRef(false);
+  /** Unpaid booking from this modal, reused if the guest retries payment with the same selection. */
+  const held = useRef<{ key: string; created: CreatedBooking } | null>(null);
 
-  // Keep exactly one attendee block per ticket.
+  // If the session ends while the modal is open (logout in another tab, refresh failed), close it.
   useEffect(() => {
-    setAttendees((a) => (a.length === qty ? a : a.length > qty ? a.slice(0, qty) : [...a, ...Array.from({ length: qty - a.length }, blankAttendee)]));
-  }, [qty]);
+    if (open && guest === null && phase !== 'working') setOpen(false);
+  }, [open, guest, phase]);
 
   useEffect(() => {
     if (open && requirements.showSession && sessions === null) getShowSessions(ticketId).then(setSessions);
   }, [open, requirements.showSession, sessions, ticketId]);
-
-  const setAttendee = (i: number, patch: Partial<Attendee>) => {
-    setAttendees((a) => a.map((x, j) => (j === i ? { ...x, ...patch } : x)));
-    setFieldErrors((e) => {
-      const next = { ...e };
-      for (const k of Object.keys(patch)) delete next[`attendees.${i}.${k}`];
-      return next;
-    });
-  };
-  const shownAttendees = attendees.map((a, i) => (i === 0 && !firstNameEdited ? { ...a, name: customerName } : a));
-  const dialog = useRef<HTMLDialogElement>(null);
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
 
   const available = quote?.availableQuantity ?? maxQuantity;
   const max = Math.max(1, Math.min(MAX_PER_BOOKING, available ?? MAX_PER_BOOKING));
@@ -111,7 +99,7 @@ export function BuyButton({ ticketId, name, unitPrice, currency, maxQuantity, re
     if (!show && d.open) d.close();
   }, [open, paying]);
 
-  // Fetch the server quote (GST included) whenever the quantity changes, debounced.
+  // Server quote (GST included) whenever the quantity changes, debounced. The backend decides the amount.
   useEffect(() => {
     if (!open || phase === 'done') return;
     const ctrl = new AbortController();
@@ -136,6 +124,20 @@ export function BuyButton({ ticketId, name, unitPrice, currency, maxQuantity, re
     };
   }, [open, phase, qty, ticketId]);
 
+  /** Buy: check the session (fresh, so an expired token is caught now), log in if needed, then open selection. */
+  async function onBuy() {
+    if (opening) return;
+    setOpening(true);
+    try {
+      const g = (await loadSession(true)) ?? (await requireLogin(LOGIN_REASON));
+      if (!g) return; // closed the login popup: nothing to resume
+      setError('');
+      setOpen(true);
+    } finally {
+      setOpening(false);
+    }
+  }
+
   const close = () => {
     if (phase === 'working') return;
     setOpen(false);
@@ -143,125 +145,128 @@ export function BuyButton({ ticketId, name, unitPrice, currency, maxQuantity, re
       setPhase('form');
       setResult(null);
       setQty(1);
-      setAttendees([blankAttendee()]);
-      setFirstNameEdited(false);
-      setCustomerName('');
-      setEmail('');
-      setPhone('');
+      setVisitDate('');
+      setSessionId('');
+      held.current = null;
     }
-    setFieldErrors({});
     setError('');
   };
 
+  const accountPhone = guest?.phone?.trim() || '';
+  const needPhone = !validPhone(accountPhone);
+
+  async function book(g: Guest, customer: Customer, attendees: Attendee[]): Promise<CreatedBooking> {
+    const key = JSON.stringify([g.id, qty, attendees]);
+    if (held.current?.key === key) return held.current.created;
+    const created = await createBooking(ticketId, qty, attendees, customer);
+    held.current = { key, created };
+    rememberBooking(g.id, created.booking.bookingNumber);
+    return created;
+  }
+
   async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (authing) return;
-    const customer = { name: customerName.trim(), email: email.trim(), phone: phone.trim() };
-    const list: Attendee[] = shownAttendees.slice(0, qty).map((a) => {
-      const out: Attendee = { name: a.name.trim() };
-      if (a.phone?.trim()) out.phone = a.phone.trim();
-      if (requirements.dateOfBirth && a.dateOfBirth) out.dateOfBirth = a.dateOfBirth;
-      if (requirements.date && a.validDate) out.validDate = a.validDate;
-      if (requirements.showSession && a.showSessionId?.trim()) out.showSessionId = a.showSessionId.trim();
-      return out;
-    });
+    if (busy.current || phase !== 'form') return;
+    busy.current = true;
     setError('');
-    setFieldErrors({});
-
-    // Bookings belong to an account: guests log in first. The login popup opens on top of this
-    // dialog, so the selected tickets, quantity and details stay exactly as they are.
-    setAuthing(true);
-    const signedIn = await requireLogin('Log in to finish your booking. Your tickets and details are saved.');
-    setAuthing(false);
-    if (!signedIn) {
-      setError('Log in to continue. Your selection is still here.');
-      return;
-    }
-
     setPhase('working');
     try {
+      let g = guest ?? (await requireLogin(LOGIN_REASON));
+      if (!g) throw new Error('Log in to continue.');
+      const buyerPhone = needPhone ? phone.trim() : accountPhone;
+      if (!validPhone(buyerPhone)) throw new Error('Enter a valid phone number (6–15 digits).');
+      const attendeesFor = (who: Guest): Attendee[] =>
+        Array.from({ length: qty }, () => {
+          const a: Attendee = { name: who.name };
+          if (requirements.date) a.validDate = visitDate;
+          if (requirements.showSession) a.showSessionId = sessionId.trim();
+          return a;
+        });
+
       if (!(await loadRazorpay())) throw new Error('Could not load the payment window. Check your connection and try again.');
-      const { booking, payment } = await createBooking(ticketId, qty, list, customer);
-      rememberBooking(signedIn.id, booking.bookingNumber);
+
+      let created: CreatedBooking;
+      try {
+        created = await book(g, { name: g.name, email: g.email, phone: buyerPhone }, attendeesFor(g));
+      } catch (err) {
+        if (!(err instanceof ApiError && err.status === 401)) throw err;
+        // Session expired and could not be refreshed: log in again and retry once with the same selection.
+        g = await requireLogin('Your session expired. Log in again to finish your booking.');
+        if (!g) throw new Error('Your session expired. Log in again to finish your booking.');
+        created = await book(g, { name: g.name, email: g.email, phone: buyerPhone }, attendeesFor(g));
+      }
+      // Remember a phone typed here so the guest isn't asked again (best effort).
+      if (needPhone) updateProfile({ name: g.name, phone: buyerPhone }).catch(() => {});
+
       setPaying(true);
       let paid: boolean;
       try {
-        paid = await openCheckout(payment, { description: `${name} × ${qty}`, customer });
+        paid = await openCheckout(created.payment, { description: `${name} × ${qty}`, customer: { name: g.name, email: g.email, phone: buyerPhone } });
       } finally {
         setPaying(false);
       }
       if (!paid) {
-        setError(`Payment wasn’t completed. Your booking ${booking.bookingNumber} is on hold: try again in a few minutes.`);
+        setError(`Payment wasn’t completed. Booking ${created.booking.bookingNumber} is on hold: press Book now to pay for it.`);
         setPhase('form');
         return;
       }
-      setResult(await confirmPayment(booking.bookingNumber));
+      held.current = null;
+      setResult(await confirmPayment(created.booking.bookingNumber));
       setPhase('done');
     } catch (err) {
-      if (err instanceof ApiError && err.status === 401) {
-        // Token expired and could not be refreshed: the session is cleared, so the next Pay asks for login again.
-        setError('Your session expired. Log in again to finish your booking. Your selection is still here.');
-      } else if (err instanceof ApiError && err.errors.length) {
-        const map: Record<string, string> = {};
-        const unplaced: string[] = [];
-        for (const e of err.errors) {
-          const k = fieldKey(e.path);
-          map[k] = e.message;
-          if (!PLACED.test(k)) unplaced.push(e.path ? `${k}: ${e.message}` : e.message);
-        }
-        setFieldErrors(map);
-        setError(unplaced.length ? unplaced.join(' · ') : 'Please fix the highlighted fields.');
-      } else setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
+      if (err instanceof ApiError && err.errors.length) setError(err.errors.map((x) => x.message).join(' · '));
+      else setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
       setPhase('form');
+    } finally {
+      busy.current = false;
     }
   }
 
   const soldOut = quote ? !quote.isAvailable : false;
   // If the quote endpoint is unavailable, show an estimate from the listed price; the booking API still charges the real amount.
   const fallback = !quote && !!quoteError && !quoting;
-  const canPay = phase === 'form' && !quoting && (!!quote || fallback) && !soldOut;
+  const canBook = phase === 'form' && !quoting && (!!quote || fallback) && !soldOut;
   const gstPct = quote ? `${+(quote.gstRate > 1 ? quote.gstRate : quote.gstRate * 100).toFixed(2)}%` : '';
-  const step = (d: number) => setQty((q) => Math.max(1, Math.min(max, q + d)));
+  const step = (d: number) => {
+    setQty((q) => Math.max(1, Math.min(max, q + d)));
+    setError('');
+  };
   const stepBtn =
-    'grid size-11 place-items-center rounded-full border border-line bg-white text-xl font-semibold text-navy transition hover:-translate-y-0.5 hover:border-blue-bright hover:text-blue-bright hover:shadow-md active:scale-90 disabled:pointer-events-none disabled:opacity-35';
+    'grid size-10 place-items-center rounded-full border border-line bg-white text-xl font-semibold text-navy transition hover:border-blue-bright hover:text-blue-bright active:scale-90 disabled:pointer-events-none disabled:opacity-35';
   const Skel = ({ w }: { w: string }) => <span className={`bk-shimmer inline-block h-4 align-middle ${w}`} />;
+  const unit = quote ? quote.unitPrice : unitPrice;
+  const availability = soldOut ? 'Sold out' : available != null ? (available <= 50 ? `Only ${available} left` : `${available} available`) : 'Available';
 
   return (
     <>
-      <LimeButton label={`Buy · ${fmt(unitPrice)}`} className="w-full" onClick={() => setOpen(true)} />
+      <LimeButton label={opening ? 'Checking…' : `Buy · ${fmt(unitPrice)}`} className="w-full" onClick={onBuy} disabled={opening} />
       {mounted &&
         createPortal(
           <dialog
             ref={dialog}
-            onClose={() => phase !== 'working' && setOpen(false)}
+            onClose={() => phase !== 'working' && !paying && setOpen(false)}
             onCancel={(e) => phase === 'working' && e.preventDefault()}
             onClick={(e) => e.target === e.currentTarget && close()}
-            className="bk-dialog m-auto w-[min(34rem,calc(100vw-1.5rem))] text-navy"
+            className="bk-dialog m-auto w-[min(32rem,calc(100vw-1.5rem))] text-navy"
             aria-labelledby={`bk-title-${ticketId}`}
           >
             <div className="bk-card relative max-h-[min(94vh,56rem)] overflow-y-auto overscroll-contain rounded-[28px] bg-cream shadow-[0_40px_120px_-20px_rgba(16,27,70,0.6)] ring-1 ring-white/40">
-              {/* Header */}
-              <header className="relative shrink-0 overflow-hidden bg-navy-deep px-7 pb-7 pt-6 text-white sm:px-9">
+              <header className="relative overflow-hidden bg-navy-deep px-7 pb-6 pt-6 text-white sm:px-9">
                 <span className="bk-orb -left-10 -top-16 size-48 bg-blue-bright" />
                 <span className="bk-orb -bottom-20 right-0 size-44 bg-coral [animation-delay:-4s]" />
-                <span className="bk-orb right-24 top-0 size-24 bg-lime opacity-30 [animation-delay:-2s]" />
                 <div className="relative flex items-start justify-between gap-4">
                   <div>
-                    <p className="text-[0.7rem] font-bold uppercase tracking-[0.22em] text-lime">{phase === 'done' ? 'Booking confirmed' : 'KILF 2027 · Pass'}</p>
-                    <h2 id={`bk-title-${ticketId}`} className="font-display mt-2 text-[1.75rem] font-semibold leading-tight tracking-[-0.02em]">
-                      {phase === 'done' ? 'You’re in!' : name}
+                    <p className="text-[0.7rem] font-bold uppercase tracking-[0.22em] text-lime">{phase === 'done' ? 'Booking confirmed' : 'Book tickets'}</p>
+                    <h2 id={`bk-title-${ticketId}`} className="font-display mt-2 text-[1.6rem] font-semibold leading-tight tracking-[-0.02em]">
+                      {phase === 'done' ? 'You’re in!' : 'KILF 2027'}
                     </h2>
-                    {phase !== 'done' && (
-                      <p className="mt-1.5 text-sm text-white/70">
-                        {quote ? money(quote.unitPrice) : fmt(unitPrice)} per ticket · GST extra
-                      </p>
-                    )}
+                    {phase !== 'done' && guest && <p className="mt-1 text-sm text-white/70">Booking as {guest.name} · {guest.email}</p>}
                   </div>
                   <button
                     type="button"
                     onClick={close}
                     aria-label="Close"
-                    className="grid size-10 shrink-0 place-items-center rounded-full bg-white/10 text-xl leading-none text-white backdrop-blur transition hover:rotate-90 hover:bg-white/20"
+                    className="grid size-10 shrink-0 place-items-center rounded-full bg-white/10 text-xl leading-none text-white transition hover:rotate-90 hover:bg-white/20"
                   >
                     ×
                   </button>
@@ -289,126 +294,22 @@ export function BuyButton({ ticketId, name, unitPrice, currency, maxQuantity, re
                   </div>
                 </div>
               ) : (
-                <form onSubmit={submit}>
-                  {/* Details */}
-                  <div className="bk-stagger grid gap-3.5 px-7 pb-6 pt-7 sm:px-9">
-                    <p className="text-[0.72rem] font-bold uppercase tracking-[0.18em] text-muted">Your details</p>
-                    <div className="bk-field">
-                      <input id={`bk-name-${ticketId}`} name="name" autoComplete="name" required minLength={2} placeholder=" " value={customerName} onChange={(e) => setCustomerName(e.target.value)} />
-                      <label htmlFor={`bk-name-${ticketId}`}>Full name</label>
-                    </div>
-                    <FieldErr msg={fieldErrors['customer.name']} />
-                    <div className="bk-field">
-                      <input id={`bk-email-${ticketId}`} name="email" type="email" autoComplete="email" required placeholder=" " value={email} onChange={(e) => setEmail(e.target.value)} />
-                      <label htmlFor={`bk-email-${ticketId}`}>Email</label>
-                    </div>
-                    <FieldErr msg={fieldErrors['customer.email']} />
-                    <div className="bk-field">
-                      <input id={`bk-phone-${ticketId}`} name="phone" type="tel" inputMode="numeric" autoComplete="tel" required pattern="[0-9+ ]{10,15}" placeholder=" " value={phone} onChange={(e) => setPhone(e.target.value)} />
-                      <label htmlFor={`bk-phone-${ticketId}`}>Phone</label>
-                    </div>
-                    <FieldErr msg={fieldErrors['customer.phone']} />
-
-                    {shownAttendees.map((a, i) => {
-                      const id = (f: string) => `bk-a${i}-${f}-${ticketId}`;
-                      const err = (f: string) => fieldErrors[`attendees.${i}.${f}`];
-                      return (
-                        <fieldset key={i} className="mt-3 grid gap-3 rounded-2xl border border-line bg-white/60 p-4">
-                          <legend className="px-1 text-[0.72rem] font-bold uppercase tracking-[0.18em] text-muted">Attendee {i + 1}</legend>
-                          <div className="bk-field">
-                            <input
-                              id={id('name')}
-                              required
-                              minLength={2}
-                              placeholder=" "
-                              value={a.name}
-                              aria-invalid={!!err('name')}
-                              onChange={(e) => {
-                                if (i === 0) setFirstNameEdited(true);
-                                setAttendee(i, { name: e.target.value });
-                              }}
-                            />
-                            <label htmlFor={id('name')}>Name</label>
-                          </div>
-                          <FieldErr msg={err('name')} />
-                          <div className="bk-field">
-                            <input id={id('phone')} type="tel" inputMode="tel" pattern="[0-9+ ]{10,15}" placeholder=" " value={a.phone ?? ''} aria-invalid={!!err('phone')} onChange={(e) => setAttendee(i, { phone: e.target.value })} />
-                            <label htmlFor={id('phone')}>Phone (optional)</label>
-                          </div>
-                          <FieldErr msg={err('phone')} />
-                          {requirements.dateOfBirth && (
-                            <>
-                              <label className="grid gap-1 text-sm font-semibold">
-                                Date of birth
-                                <input type="date" required className={inputCls} value={a.dateOfBirth ?? ''} aria-invalid={!!err('dateOfBirth')} onChange={(e) => setAttendee(i, { dateOfBirth: e.target.value })} />
-                              </label>
-                              <FieldErr msg={err('dateOfBirth')} />
-                            </>
-                          )}
-                          {requirements.date && (
-                            <>
-                              <label className="grid gap-1 text-sm font-semibold">
-                                Day of visit
-                                <input type="date" required className={inputCls} value={a.validDate ?? ''} aria-invalid={!!err('validDate')} onChange={(e) => setAttendee(i, { validDate: e.target.value })} />
-                              </label>
-                              <FieldErr msg={err('validDate')} />
-                            </>
-                          )}
-                          {requirements.showSession && (
-                            <>
-                              <label className="grid gap-1 text-sm font-semibold">
-                                Show session
-                                {sessions && sessions.length > 0 ? (
-                                  <select required className={inputCls} value={a.showSessionId ?? ''} aria-invalid={!!err('showSessionId')} onChange={(e) => setAttendee(i, { showSessionId: e.target.value })}>
-                                    <option value="" disabled>
-                                      Choose a session
-                                    </option>
-                                    {sessions.map((s) => (
-                                      <option key={s.id} value={s.id}>
-                                        {s.label}
-                                      </option>
-                                    ))}
-                                  </select>
-                                ) : (
-                                  <input
-                                    required
-                                    pattern="[0-9a-fA-F\-]{36}"
-                                    placeholder={sessions === null ? 'Loading sessions…' : 'Session ID'}
-                                    className={inputCls}
-                                    value={a.showSessionId ?? ''}
-                                    aria-invalid={!!err('showSessionId')}
-                                    onChange={(e) => setAttendee(i, { showSessionId: e.target.value })}
-                                  />
-                                )}
-                              </label>
-                              <FieldErr msg={err('showSessionId')} />
-                            </>
-                          )}
-                        </fieldset>
-                      );
-                    })}
-                    {error && (
-                      <p role="alert" className="rounded-xl bg-coral-soft px-4 py-3 text-sm font-semibold text-coral-ink">
-                        {error}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Bottom: quantity + price + pay */}
-                  <div className="border-t border-line bg-white px-7 pb-6 pt-5 sm:px-9">
-                    <div className="flex items-center justify-between gap-4">
+                <form onSubmit={submit} className="px-7 py-6 sm:px-9">
+                  <p className="text-[0.72rem] font-bold uppercase tracking-[0.18em] text-muted">Ticket type</p>
+                  {/* Ticket type row: name, price, availability, quantity, line subtotal */}
+                  <div className={`mt-2 rounded-2xl border bg-white p-4 ${soldOut ? 'border-line opacity-60' : 'border-blue-bright/40'}`}>
+                    <div className="flex items-start justify-between gap-3">
                       <div>
-                        <p className="text-sm font-semibold">Tickets</p>
-                        <p className="text-xs text-muted">
-                          {soldOut ? 'Sold out' : available != null && available <= 50 ? `Only ${available} left · ` : ''}
-                          {!soldOut && `max ${max} per booking`}
+                        <p className="font-semibold">{name}</p>
+                        <p className="text-sm text-muted">
+                          {money(unit)} per ticket · <span className={soldOut ? 'font-semibold text-coral-ink' : ''}>{availability}</span>
                         </p>
                       </div>
-                      <div className="flex items-center gap-3 rounded-full bg-sky p-1.5" role="group" aria-label="Quantity">
+                      <div className="flex items-center gap-2 rounded-full bg-sky p-1" role="group" aria-label={`Quantity of ${name}`}>
                         <button type="button" className={stepBtn} onClick={() => step(-1)} disabled={qty <= 1 || phase !== 'form'} aria-label="Fewer tickets">
                           −
                         </button>
-                        <span key={qty} className="bk-num numeral w-8 text-center text-2xl text-navy" aria-live="polite">
+                        <span key={qty} className="bk-num numeral w-7 text-center text-xl text-navy" aria-live="polite">
                           {qty}
                         </span>
                         <button type="button" className={stepBtn} onClick={() => step(1)} disabled={qty >= max || phase !== 'form' || soldOut} aria-label="More tickets">
@@ -416,42 +317,94 @@ export function BuyButton({ ticketId, name, unitPrice, currency, maxQuantity, re
                         </button>
                       </div>
                     </div>
+                    <p className="mt-3 flex justify-between border-t border-dashed border-line pt-3 text-sm">
+                      <span className="text-muted">
+                        {qty} × {money(unit)} · max {max} per booking
+                      </span>
+                      <span className="font-semibold">{quote && !quoting ? money(quote.subtotalAmount) : fallback ? money(unitPrice * qty) : <Skel w="w-14" />}</span>
+                    </p>
+                  </div>
 
-                    <dl className="mt-5 grid gap-1.5 text-sm">
-                      <div className="flex justify-between text-muted">
-                        <dt>Subtotal</dt>
-                        <dd>{quote && !quoting ? money(quote.subtotalAmount) : fallback ? money(unitPrice * qty) : <Skel w="w-16" />}</dd>
-                      </div>
-                      <div className="flex justify-between text-muted">
-                        <dt>GST{gstPct && ` (${gstPct})`}</dt>
-                        <dd>{quote && !quoting ? money(quote.gstAmount) : fallback ? 'Added at checkout' : <Skel w="w-12" />}</dd>
-                      </div>
-                    </dl>
-
-                    {fallback && <p className="mt-3 text-xs text-muted">Price unavailable right now. The final amount, including GST, is shown at payment.</p>}
-
-                    <div className="mt-4 flex items-center justify-between gap-4 border-t border-dashed border-line pt-4">
-                      <p>
-                        <span className="eyebrow block text-muted">Total</span>
-                        {quote && !quoting ? (
-                          <span key={quote.totalAmount} className="bk-num numeral text-3xl text-blue-bright">
-                            {money(quote.totalAmount)}
-                          </span>
-                        ) : fallback ? (
-                          <span className="numeral text-3xl text-blue-bright">
-                            {fmt(unitPrice * qty)}
-                            <span className="ml-1.5 align-middle text-sm font-semibold text-muted">+ GST</span>
-                          </span>
-                        ) : (
-                          <span className="bk-shimmer mt-1 block h-8 w-28" />
-                        )}
-                      </p>
-                      <LimeButton
-                        type="submit"
-                        label={authing ? 'Logging in…' : phase === 'working' ? 'Processing…' : soldOut ? 'Sold out' : guest ? 'Pay now' : 'Log in & pay'}
-                        disabled={!canPay || authing}
-                      />
+                  {/* Only what the ticket itself needs: never name/email again. */}
+                  {(requirements.date || requirements.showSession || needPhone) && (
+                    <div className="mt-5 grid gap-3">
+                      {requirements.date && (
+                        <label className="grid gap-1 text-sm font-semibold">
+                          Day of visit
+                          <input type="date" required className={inputCls} value={visitDate} onChange={(e) => setVisitDate(e.target.value)} />
+                        </label>
+                      )}
+                      {requirements.showSession && (
+                        <label className="grid gap-1 text-sm font-semibold">
+                          Show session
+                          {sessions && sessions.length > 0 ? (
+                            <select required className={inputCls} value={sessionId} onChange={(e) => setSessionId(e.target.value)}>
+                              <option value="" disabled>
+                                Choose a session
+                              </option>
+                              {sessions.map((s) => (
+                                <option key={s.id} value={s.id}>
+                                  {s.label}
+                                </option>
+                              ))}
+                            </select>
+                          ) : (
+                            <input
+                              required
+                              pattern="[0-9a-fA-F\-]{36}"
+                              placeholder={sessions === null ? 'Loading sessions…' : 'Session ID'}
+                              className={inputCls}
+                              value={sessionId}
+                              onChange={(e) => setSessionId(e.target.value)}
+                            />
+                          )}
+                        </label>
+                      )}
+                      {needPhone && (
+                        <label className="grid gap-1 text-sm font-semibold">
+                          Phone for your tickets
+                          <input type="tel" inputMode="tel" autoComplete="tel" required pattern="[0-9+ ]{6,15}" className={inputCls} value={phone} onChange={(e) => setPhone(e.target.value)} />
+                          <span className="text-xs font-normal text-muted">Asked once; saved to your account.</span>
+                        </label>
+                      )}
                     </div>
+                  )}
+
+                  <dl className="mt-5 grid gap-1.5 text-sm">
+                    <div className="flex justify-between text-muted">
+                      <dt>Subtotal</dt>
+                      <dd>{quote && !quoting ? money(quote.subtotalAmount) : fallback ? money(unitPrice * qty) : <Skel w="w-16" />}</dd>
+                    </div>
+                    <div className="flex justify-between text-muted">
+                      <dt>GST{gstPct && ` (${gstPct})`}</dt>
+                      <dd>{quote && !quoting ? money(quote.gstAmount) : fallback ? 'Added at checkout' : <Skel w="w-12" />}</dd>
+                    </div>
+                  </dl>
+                  {fallback && <p className="mt-2 text-xs text-muted">Price unavailable right now. The final amount, including GST, is shown at payment.</p>}
+
+                  {error && (
+                    <p role="alert" className="mt-4 rounded-xl bg-coral-soft px-4 py-3 text-sm font-semibold text-coral-ink">
+                      {error}
+                    </p>
+                  )}
+
+                  <div className="mt-4 flex items-center justify-between gap-4 border-t border-dashed border-line pt-4">
+                    <p>
+                      <span className="eyebrow block text-muted">Total</span>
+                      {quote && !quoting ? (
+                        <span key={quote.totalAmount} className="bk-num numeral text-3xl text-blue-bright">
+                          {money(quote.totalAmount)}
+                        </span>
+                      ) : fallback ? (
+                        <span className="numeral text-3xl text-blue-bright">
+                          {fmt(unitPrice * qty)}
+                          <span className="ml-1.5 align-middle text-sm font-semibold text-muted">+ GST</span>
+                        </span>
+                      ) : (
+                        <span className="bk-shimmer mt-1 block h-8 w-28" />
+                      )}
+                    </p>
+                    <LimeButton type="submit" label={phase === 'working' ? 'Processing…' : soldOut ? 'Sold out' : 'Book now'} disabled={!canBook} />
                   </div>
                 </form>
               )}
@@ -461,12 +414,4 @@ export function BuyButton({ ticketId, name, unitPrice, currency, maxQuantity, re
         )}
     </>
   );
-}
-
-function FieldErr({ msg }: { msg?: string }) {
-  return msg ? (
-    <p role="alert" className="-mt-1.5 text-xs font-semibold text-coral-ink">
-      {msg}
-    </p>
-  ) : null;
 }

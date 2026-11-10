@@ -1,0 +1,11 @@
+[
+  { "id": "literature", "order": 1, "icon": "book", "name": "Literature", "name_ml": "സാഹിത്യം", "blurb": "Novelists, poets and critics in conversation.", "blurb_ml": "നോവലിസ്റ്റുകളും കവികളും നിരൂപകരും സംവദിക്കുന്നു." },
+  { "id": "cinema", "order": 2, "icon": "film", "name": "Cinema", "name_ml": "സിനിമ", "blurb": "From the page to the frame, and back.", "blurb_ml": "താളിൽ നിന്ന് ഫ്രെയിമിലേക്ക്, തിരിച്ചും." },
+  { "id": "music", "order": 3, "icon": "music", "name": "Music", "name_ml": "സംഗീതം", "blurb": "Songs, lyrics and evenings by the lake.", "blurb_ml": "പാട്ടും വരികളും കായൽക്കരയിലെ സന്ധ്യകളും." },
+  { "id": "theatre", "order": 4, "icon": "mask", "name": "Theatre", "name_ml": "നാടകം", "blurb": "Stories staged, and stories you step into.", "blurb_ml": "അരങ്ങിലെത്തുന്ന കഥകൾ, നമ്മൾ കയറിച്ചെല്ലുന്ന കഥകൾ." },
+  { "id": "art", "order": 5, "icon": "palette", "name": "Art", "name_ml": "കല", "blurb": "Exhibitions, illustration and visual storytelling.", "blurb_ml": "പ്രദർശനങ്ങൾ, ചിത്രീകരണം, ദൃശ്യകഥനം." },
+  { "id": "ideas", "order": 6, "icon": "bulb", "name": "Ideas & Society", "name_ml": "ആശയങ്ങളും സമൂഹവും", "blurb": "History, faith, media and the questions Kerala keeps asking.", "blurb_ml": "ചരിത്രം, വിശ്വാസം, മാധ്യമം, കേരളം ചോദിച്ചുകൊണ്ടേയിരിക്കുന്ന ചോദ്യങ്ങൾ." },
+  { "id": "children", "order": 7, "icon": "kite", "name": "Children's", "name_ml": "കുട്ടികൾക്ക്", "blurb": "Storytelling, workshops and first favourite books.", "blurb_ml": "കഥപറച്ചിൽ, ശില്പശാലകൾ, ആദ്യ പ്രിയപുസ്തകങ്ങൾ." },
+  { "id": "bookfair", "order": 8, "icon": "books", "name": "Book Fair", "name_ml": "പുസ്തകമേള", "blurb": "Publishers, new releases and signed copies.", "blurb_ml": "പ്രസാധകർ, പുതിയ പുസ്തകങ്ങൾ, ഒപ്പിട്ട പ്രതികൾ." },
+  { "id": "food", "order": 9, "icon": "bowl", "name": "Food Festival", "name_ml": "ഭക്ഷ്യമേള", "blurb": "Kollam's kitchens, by the water, after dark.", "blurb_ml": "രാത്രിയിൽ, കായലോരത്ത്, കൊല്ലത്തിന്റെ രുചികൾ." }
+]

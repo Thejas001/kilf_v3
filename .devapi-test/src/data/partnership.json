@@ -1,0 +1,38 @@
+{
+  "_note": "TODO(proposal): check every line below against the sponsorship proposal PDF. Never add prices here.",
+  "why": [
+    { "icon": "star", "title": "Be a founding partner", "text": "This is the first edition. Founding partners are written into KILF’s story from page one." },
+    { "icon": "users", "title": "A rare audience", "text": "Readers, students, families and creators, gathered for five days in one place." },
+    { "icon": "moon", "title": "Own New Year’s Eve", "text": "The midnight chapter by the lake: the moment everyone remembers, and shares." },
+    { "icon": "leaf", "title": "A lasting cause", "text": "Reading culture, young voices and a protected lake. Support that outlives the festival." }
+  ],
+  "audience": [
+    { "icon": "book", "title": "Readers & book lovers" },
+    { "icon": "graduation", "title": "Students & young people" },
+    { "icon": "heart", "title": "Families & children" },
+    { "icon": "pen", "title": "Writers, artists & creators" },
+    { "icon": "briefcase", "title": "Professionals & decision-makers" },
+    { "icon": "globe", "title": "Visitors & the diaspora" }
+  ],
+  "tiers": [
+    { "id": "title", "name": "Title Partner", "count": "1", "text": "The festival carries your name. Maximum visibility across every touchpoint.", "highlight": true },
+    { "id": "presenting", "name": "Presenting Partner", "count": "2", "text": "Presented-by credit, stage presence and a signature moment." },
+    { "id": "associate", "name": "Associate Partner", "count": "4", "text": "Strong visibility across venues, print and digital." },
+    { "id": "category", "name": "Category Partners", "count": "Per category", "text": "Own a category: hospitality, travel, banking, education and more." },
+    { "id": "inkind", "name": "In-kind & Media", "count": "Open", "text": "Services, products or media reach in exchange for recognition." }
+  ],
+  "matrixColumns": ["Title", "Presenting", "Associate", "Category", "In-kind & Media"],
+  "matrix": [
+    { "benefit": "Festival naming rights", "tiers": [true, false, false, false, false] },
+    { "benefit": "“Presented by” credit", "tiers": [false, true, false, false, false] },
+    { "benefit": "Logo on main stage backdrop", "tiers": [true, true, true, false, false] },
+    { "benefit": "Logo on passes", "tiers": [true, true, false, false, false] },
+    { "benefit": "Logo on website and social media", "tiers": [true, true, true, true, true] },
+    { "benefit": "Mentions in press releases", "tiers": [true, true, true, false, false] },
+    { "benefit": "Branded session, zone or stage", "tiers": [true, true, false, true, false] },
+    { "benefit": "New Year’s Eve countdown branding", "tiers": [true, false, false, false, false] },
+    { "benefit": "Activation / stall space", "tiers": [true, true, true, true, false] },
+    { "benefit": "On-stage acknowledgement", "tiers": [true, true, true, true, true] },
+    { "benefit": "Complimentary Festival Passes", "tiers": [true, true, true, true, true] }
+  ]
+}
