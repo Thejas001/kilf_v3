@@ -80,8 +80,30 @@ async function call<T>(path: string, body?: unknown): Promise<T> {
   return json.data as T;
 }
 
-export const createBooking = (ticketId: string, quantity: number, attendees: Attendee[], customer: Customer) =>
-  call<CreatedBooking>('/api/bookings', { ticketId, quantity, attendees, customer });
+type Obj = Record<string, unknown>;
+const asObj = (v: unknown): Obj => (v && typeof v === 'object' ? (v as Obj) : {});
+const firstStr = (...v: unknown[]) => v.find((x) => typeof x === 'string' && x) as string | undefined;
+
+/** The booking API's payment block has varied in name and field casing; accept the known shapes. */
+function normalizePayment(data: Obj): RazorpayPayment {
+  const booking = asObj(data.booking);
+  const p = asObj(data.payment ?? data.razorpay ?? data.razorpayOrder ?? data.order ?? booking.payment);
+  const order = asObj(p.order ?? p.razorpayOrder);
+  const keyId = firstStr(p.keyId, p.key, p.key_id, p.razorpayKeyId, data.keyId, data.razorpayKeyId, data.key);
+  const orderId = firstStr(p.orderId, p.order_id, p.razorpayOrderId, order.id, p.id, data.orderId, data.razorpayOrderId);
+  const amount = Number(p.amount ?? order.amount ?? data.amount ?? Math.round(Number(booking.totalAmount) * 100));
+  const currency = firstStr(p.currency, order.currency, booking.currency) ?? 'INR';
+  if (!keyId || !orderId) {
+    console.error('Booking response has no Razorpay key/order', data);
+    throw new Error('The payment could not be started (no payment order from the server). Please try again or contact us.');
+  }
+  return { keyId, orderId, amount, currency };
+}
+
+export async function createBooking(ticketId: string, quantity: number, attendees: Attendee[], customer: Customer): Promise<CreatedBooking> {
+  const data = await call<Obj>('/api/bookings', { ticketId, quantity, attendees, customer });
+  return { booking: data.booking as CreatedBooking['booking'], payment: normalizePayment(data) };
+}
 
 export interface ShowSession {
   id: string;
