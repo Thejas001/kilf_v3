@@ -1,0 +1,114 @@
+[
+  {
+    "id": "when-where",
+    "order": 1,
+    "question": "When and where is KILF?",
+    "answer": "KILF 2027 runs for five days, from 31 December 2026 to 4 January 2027, in Kollam, Kerala. Sessions take place at the Sreenarayana Guru Cultural Centre and 8 Point Art Cafe, both in Kollam city, close to Ashtamudi Lake.",
+    "group": "festival"
+  },
+  {
+    "id": "language",
+    "order": 2,
+    "question": "Are sessions in Malayalam or English?",
+    "answer": "Both. Most sessions will be in Malayalam, with several in English and some bilingual. The language of each session will be listed in the full programme.",
+    "group": "festival"
+  },
+  {
+    "id": "passes",
+    "order": 3,
+    "question": "When do passes go on sale?",
+    "answer": "Ticketing opens soon. Register your interest now and we will tell you first when Day, Festival and Young Reader passes become available.",
+    "group": "tickets"
+  },
+  {
+    "id": "prices",
+    "question": "How much do passes cost?",
+    "answer": "A Day Pass is ₹299. The Festival Pass, for all five days, is ₹499. Students get all five days for ₹199 with the Young Reader Pass (bring your college ID). Khasakkinte Ithihasam is ticketed separately: ₹1,500, or ₹1,600 with a Festival Pass.",
+    "order": 4,
+    "group": "tickets"
+  },
+  {
+    "id": "theatre",
+    "order": 5,
+    "question": "Is Khasakkinte Ithihasam included in the Festival Pass?",
+    "answer": "No, the play is ticketed separately: three evening performances on 1, 2 and 3 January. A theatre ticket is ₹1,500. The theatre + Festival Pass bundle, ₹1,600, adds all five days of the festival.",
+    "group": "tickets"
+  },
+  {
+    "id": "final",
+    "order": 6,
+    "question": "Are the speakers and programme final?",
+    "answer": "Not yet. The line-up shown is proposed and participation is subject to confirmation. The full programme will be unveiled closer to the festival.",
+    "group": "festival"
+  },
+  {
+    "id": "families",
+    "order": 7,
+    "question": "What can families and young visitors discover?",
+    "answer": "A children's strand with storytelling and workshops, a youth stage with poetry slams and open mics, the book fair, art, music by the lake and a food festival in the evenings.",
+    "group": "festival"
+  },
+  {
+    "id": "volunteer-stall",
+    "order": 8,
+    "question": "Can I volunteer or set up a book stall?",
+    "answer": "Yes. Volunteers can help with hospitality, stage and guest care. Publishers, artists and food vendors can apply to exhibit. Use the forms on the Get involved page.",
+    "group": "taking-part"
+  },
+  {
+    "id": "new-year",
+    "order": 9,
+    "question": "What happens on New Year’s Eve?",
+    "answer": "The first night, 31 December 2026, opens with a conversation with M. Mukundan and a lamp lit at sunset, then New Year’s Eve by the lake: live music with Shanka Tribe, and the countdown to 2027. The proposed programme has the times.",
+    "group": "festival"
+  },
+  {
+    "id": "children",
+    "order": 10,
+    "question": "Can I bring children?",
+    "answer": "Yes. The festival has a children's strand with storytelling, workshops and first favourite books. Sessions for younger visitors will be marked in the programme.",
+    "group": "festival"
+  },
+  {
+    "id": "food",
+    "order": 11,
+    "question": "Will there be food?",
+    "answer": "Yes. In the evenings the food strand brings Kollam’s kitchens to the water, with music by the lake.",
+    "group": "festival"
+  },
+  {
+    "id": "access",
+    "order": 12,
+    "question": "Is the festival accessible?",
+    "answer": "We want everyone to enjoy KILF. If you have access needs, write to us before you come and we’ll help plan your visit. Access details for each venue will be shared with the programme.",
+    "group": "visiting"
+  },
+  {
+    "id": "getting-here",
+    "order": 13,
+    "question": "How do I get to Kollam?",
+    "answer": "Kollam Junction is on the main railway line through Kerala, Trivandrum International Airport is the nearest airport, and the city sits on NH 66. See Plan your visit for more.",
+    "group": "visiting"
+  },
+  {
+    "id": "stay",
+    "order": 14,
+    "question": "Where can I stay?",
+    "answer": "Kollam has city hotels, homestays and lakeside resorts around Ashtamudi. New Year is a busy week on the Kerala coast, so book early.",
+    "group": "visiting"
+  },
+  {
+    "id": "colleges",
+    "order": 15,
+    "question": "How can my college take part?",
+    "answer": "Register your college on the Youth page. Registered colleges hear first about the youth stage, campus ambassadors and group passes for students.",
+    "group": "taking-part"
+  },
+  {
+    "id": "suggest",
+    "order": 16,
+    "question": "Can I suggest a speaker or a session?",
+    "answer": "Yes, please. Write to kilf2027@gmail.com with the name and why they belong at KILF. Every suggestion is read by the programme team.",
+    "group": "taking-part"
+  }
+]

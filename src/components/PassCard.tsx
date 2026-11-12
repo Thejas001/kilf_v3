@@ -1,6 +1,7 @@
 import type { CSSProperties } from 'react';
 import { LimeButton } from '@/components/LimeButton';
 import { BuyButton } from '@/components/BuyButton';
+import type { TicketRequirements } from '@/lib/bookings';
 
 export interface PassCardData {
   id: string;
@@ -13,7 +14,7 @@ export interface PassCardData {
   priceNote?: string;
   buyUrl?: string;
   /** Set for live API tickets that are on sale: shows the in-page checkout. */
-  checkout?: { ticketId: string; unitPrice: number; currency: string; maxQuantity?: number };
+  checkout?: { ticketId: string; unitPrice: number; currency: string; maxQuantity?: number; requirements?: TicketRequirements };
 }
 
 /** Colour that blends from `off` to `on` as the card's --t (0..1) goes from resting to highlighted. */

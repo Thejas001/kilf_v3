@@ -4,8 +4,8 @@ import { SmartLink } from '@/components/SmartLink';
 import { useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
 import { Logo } from './Logo';
-import { LimeButton } from './LimeButton';
 import { Icon } from './Icon';
+import { AccountButton, AuthDialog } from './AuthModal';
 import { site } from '@/lib/site';
 import { useTranslations, localizePath, parsePath } from '@/i18n/ui';
 
@@ -25,6 +25,7 @@ export function Header() {
     { href: '/about', label: t('nav.about') },
     { href: '/speakers', label: t('nav.speakers') },
     { href: '/khasak', label: t('nav.theatre') },
+    { href: '/passes', label: t('nav.passes') },
     { href: '/visit', label: t('nav.visit') },
   ];
   // Malayalam labels are longer, so the full nav needs more room.
@@ -70,7 +71,7 @@ export function Header() {
         }
       };
       const onMenuClick = (e: MouseEvent) => {
-        if ((e.target as HTMLElement).closest('a')) set(false);
+        if ((e.target as HTMLElement).closest('a, button')) set(false);
       };
       const mq = matchMedia(menu.hasAttribute('data-wide') ? '(min-width: 1280px)' : '(min-width: 1024px)');
       const onMqChange = (e: MediaQueryListEvent) => e.matches && set(false);
@@ -125,7 +126,7 @@ export function Header() {
 
           <div className="flex items-center gap-2">
             <span className="hidden sm:contents">
-              <LimeButton href={lp('/get-involved#register')} label={t('cta.register')} size="sm" className="hdr-cta min-w-[8.5rem] justify-between !gap-6" />
+              <AccountButton />
             </span>
             <button
               ref={btnRef}
@@ -157,7 +158,7 @@ export function Header() {
       >
         <nav aria-label={t('nav.primary')} className="container-kilf flex min-h-full flex-col pb-10 pt-[calc(var(--hh)+1.25rem)]">
           <div style={{ '--i': 0 } as React.CSSProperties}>
-            <LimeButton href={lp('/get-involved#register')} label={t('cta.register')} className="w-full" />
+            <AccountButton variant="menu" />
           </div>
           <ul className="mt-6 flex-1">
             {nav.map((item, i) => (
@@ -181,6 +182,8 @@ export function Header() {
           </a>
         </nav>
       </div>
+
+      <AuthDialog />
 
       <style jsx>{`
         .site-header {

@@ -1,0 +1,739 @@
+[
+  {
+    "id": "2026-12-31",
+    "date": "2026-12-31",
+    "label": "Day 1",
+    "theme": "The Eve.",
+    "blurb": "The first chapter opens at sunset. A great novelist speaks, a lamp is lit by the water, Shanka Tribe takes the stage, and 2027 arrives over Ashtamudi.",
+    "allDay": [
+      "Book fair · 15:00–23:00",
+      "Food festival · from 18:00"
+    ],
+    "sessions": [
+      {
+        "start": "17:00",
+        "end": "18:00",
+        "title": "Why we still need stories",
+        "description": "The opening conversation. The novelist from Mahé, whose Delhi: A Soliloquy won the JCB Prize for Literature, on a lifetime of stories and why they matter more than ever.",
+        "venue": "sngcc",
+        "strand": "literature",
+        "format": "conversation",
+        "speakers": [
+          "m-mukundan"
+        ],
+        "guests": [],
+        "language": "Malayalam",
+        "highlight": true
+      },
+      {
+        "start": "18:15",
+        "end": "18:45",
+        "title": "Lighting the lamp at sunset",
+        "description": "The festival opens by the water as the sun goes down: a traditional lamp, a welcome from Kollam, and the first page turned.",
+        "format": "ceremony",
+        "speakers": [],
+        "guests": [
+          "Festival hosts and guests of honour (to be announced)"
+        ],
+        "language": "Bilingual",
+        "highlight": false
+      },
+      {
+        "start": "19:00",
+        "end": "20:00",
+        "title": "The year in books",
+        "description": "A lively, opinionated look back at the Malayalam and English books that defined 2026, and the ones to read next.",
+        "venue": "8point",
+        "strand": "literature",
+        "format": "panel",
+        "speakers": [],
+        "guests": [
+          "Critics, booksellers and readers (invited)"
+        ],
+        "language": "Bilingual",
+        "highlight": false
+      },
+      {
+        "start": "20:30",
+        "end": "23:30",
+        "title": "New Year’s Eve by the lake: Shanka Tribe",
+        "description": "Shanka Tribe plays the old year out and the new one in, live on the open-air stage by the lake, all the way to the countdown.",
+        "strand": "music",
+        "format": "performance",
+        "speakers": [],
+        "guests": [
+          "Shanka Tribe"
+        ],
+        "highlight": true
+      },
+      {
+        "start": "23:45",
+        "end": "00:15",
+        "title": "Countdown on Ashtamudi",
+        "description": "The countdown to 2027 with Shanka Tribe on stage, together by the lake, and the first minutes of the new year.",
+        "format": "ceremony",
+        "speakers": [],
+        "guests": [],
+        "language": "Bilingual",
+        "highlight": true
+      }
+    ]
+  },
+  {
+    "id": "2027-01-01",
+    "date": "2027-01-01",
+    "label": "Day 2",
+    "theme": "First light.",
+    "blurb": "New Year’s Day begins with poems at sunrise and becomes a day of great Malayalam storytellers: the novel, the short story and the films that grew from them. At night, Khasak opens.",
+    "allDay": [
+      "Book fair · 10:00–21:00",
+      "Food festival · 17:00–23:00",
+      "Exhibition: Eight Arms, art on Ashtamudi · 8 Point Art Cafe · 10:00–20:00"
+    ],
+    "sessions": [
+      {
+        "start": "06:30",
+        "end": "07:30",
+        "title": "First light: poems for a new year",
+        "description": "Readings on the lakeside deck as the first sun of 2027 comes up over the water.",
+        "venue": "8point",
+        "strand": "literature",
+        "format": "reading",
+        "speakers": [],
+        "guests": [
+          "Young poets of Kerala, chosen by open call"
+        ],
+        "language": "Bilingual",
+        "highlight": false
+      },
+      {
+        "start": "10:00",
+        "end": "11:00",
+        "title": "The Malayali in the mirror",
+        "description": "The author of Manushyanu Oru Aamukham (A Preface to Man), winner of the Sahitya Akademi Award, on a novel that spans a century of Kerala life, and what it says about us.",
+        "venue": "sngcc",
+        "strand": "literature",
+        "format": "conversation",
+        "speakers": [
+          "subhash-chandran"
+        ],
+        "guests": [],
+        "language": "Malayalam",
+        "highlight": true
+      },
+      {
+        "start": "11:00",
+        "end": "12:30",
+        "title": "From notebook to novel",
+        "description": "A hands-on workshop for first-time writers with the author of the bestselling Ram C/O Anandhi. Limited places.",
+        "venue": "8point",
+        "strand": "literature",
+        "format": "workshop",
+        "speakers": [
+          "akhil-p-dharmajan"
+        ],
+        "guests": [],
+        "language": "Malayalam",
+        "highlight": false
+      },
+      {
+        "start": "11:30",
+        "end": "12:30",
+        "title": "Short story, long life",
+        "description": "Two masters of the form on why the Malayalam short story keeps reinventing itself, from Bhaskara Pattelar to Biriyani.",
+        "venue": "sngcc",
+        "strand": "literature",
+        "format": "conversation",
+        "speakers": [
+          "zacharia",
+          "santhosh-echikkanam"
+        ],
+        "guests": [],
+        "language": "Malayalam",
+        "highlight": false
+      },
+      {
+        "start": "14:00",
+        "end": "15:00",
+        "title": "Meesha: a novel and its storm",
+        "description": "The JCB Prize-winning novelist on writing Meesha (Moustache), the storm that met it, and what a novel owes its readers.",
+        "venue": "sngcc",
+        "strand": "literature",
+        "format": "conversation",
+        "speakers": [
+          "s-hareesh"
+        ],
+        "guests": [],
+        "language": "Malayalam",
+        "highlight": true
+      },
+      {
+        "start": "15:00",
+        "end": "16:30",
+        "title": "Story Boat: tales from the lake",
+        "description": "Stories of fish, boats and monsoon ghosts for ages 6 to 12, with a drawing to take home.",
+        "strand": "children",
+        "format": "performance",
+        "speakers": [],
+        "guests": [
+          "Storytellers (to be announced)"
+        ],
+        "language": "Malayalam",
+        "highlight": false
+      },
+      {
+        "start": "15:30",
+        "end": "16:45",
+        "title": "Agnisakshi to Ore Kadal: the art of adaptation",
+        "description": "The filmmaker known for bringing novels and plays to the screen on what to keep, what to let go, and how a book becomes a film.",
+        "venue": "sngcc",
+        "strand": "cinema",
+        "format": "conversation",
+        "speakers": [
+          "shyamaprasad"
+        ],
+        "guests": [],
+        "language": "Bilingual",
+        "highlight": false
+      },
+      {
+        "start": "17:00",
+        "end": "18:00",
+        "title": "Sketching the backwaters",
+        "description": "Illustrators draw the lake live as the light changes. Bring a sketchbook and join in.",
+        "venue": "8point",
+        "strand": "art",
+        "format": "workshop",
+        "speakers": [],
+        "guests": [
+          "Illustrators from Kerala (invited)"
+        ],
+        "language": "Bilingual",
+        "highlight": false
+      },
+      {
+        "start": "18:00",
+        "end": "19:30",
+        "title": "Kavi Arangu: poetry without borders",
+        "description": "The Tamil poet and seven-time National Award-winning lyricist reads with Malayalam poets: two languages, one evening of verse.",
+        "venue": "sngcc",
+        "strand": "literature",
+        "format": "performance",
+        "speakers": [
+          "vairamuthu"
+        ],
+        "guests": [
+          "Malayalam poets (invited)"
+        ],
+        "language": "Bilingual",
+        "highlight": true
+      },
+      {
+        "start": "19:00",
+        "title": "Khasakkinte Ithihasam: opening night",
+        "description": "O. V. Vijayan’s novel as immersive theatre, directed by Deepan Sivaraman: a world you walk into. Evening performance; exact time to be confirmed. Ticketed separately: ₹1,500, or ₹1,600 with a Festival Pass for all five days.",
+        "strand": "theatre",
+        "format": "performance",
+        "speakers": [],
+        "guests": [],
+        "language": "Malayalam",
+        "highlight": true,
+        "link": {
+          "href": "/khasak#tickets",
+          "label": "Choose your ticket"
+        }
+      }
+    ]
+  },
+  {
+    "id": "2027-01-02",
+    "date": "2027-01-02",
+    "label": "Day 3",
+    "theme": "Voices without borders.",
+    "blurb": "A day about crossing over, into other languages, other lives and other art forms: translation, women’s writing, a film that broke loose, history for everyone, and a night that belongs to the young.",
+    "allDay": [
+      "Book fair · 10:00–21:00",
+      "Food festival · 17:00–23:00",
+      "Exhibition: Eight Arms, art on Ashtamudi · 8 Point Art Cafe · 10:00–20:00"
+    ],
+    "sessions": [
+      {
+        "start": "07:00",
+        "end": "09:00",
+        "title": "Murals and memory: a heritage walk",
+        "description": "A morning walk through Kollam’s old quarters with the art historian, on temple murals, trade and the city’s layered past. Starts at 8 Point Art Cafe; places are limited.",
+        "venue": "8point",
+        "strand": "art",
+        "format": "walk",
+        "speakers": [
+          "m-g-sasibhooshan"
+        ],
+        "guests": [],
+        "language": "Malayalam",
+        "highlight": false
+      },
+      {
+        "start": "10:00",
+        "end": "11:00",
+        "title": "Aalahayude Penmakkal, and after",
+        "description": "One of Malayalam’s boldest novelists on women, faith, the land, and the lives her novels bring to the centre.",
+        "venue": "sngcc",
+        "strand": "literature",
+        "format": "conversation",
+        "speakers": [
+          "sara-joseph"
+        ],
+        "guests": [],
+        "language": "Malayalam",
+        "highlight": true
+      },
+      {
+        "start": "11:00",
+        "end": "12:30",
+        "title": "Publishers’ table: the future of the book",
+        "description": "Paper, screens, audiobooks and translation: publishers on what readers want next, and how a new writer gets found.",
+        "venue": "8point",
+        "strand": "bookfair",
+        "format": "panel",
+        "speakers": [],
+        "guests": [
+          "Malayalam, English and Tamil publishers (invited)"
+        ],
+        "language": "Bilingual",
+        "highlight": false
+      },
+      {
+        "start": "11:30",
+        "end": "12:45",
+        "title": "Mahé, Delhi and the world",
+        "description": "How a Malayalam novel travels: the author and his translators on carrying a language, its jokes and its silences, into English.",
+        "venue": "sngcc",
+        "strand": "literature",
+        "format": "conversation",
+        "speakers": [
+          "m-mukundan"
+        ],
+        "guests": [
+          "The translators of Delhi: A Soliloquy (invited)"
+        ],
+        "language": "Bilingual",
+        "highlight": false
+      },
+      {
+        "start": "14:00",
+        "end": "15:15",
+        "title": "Jallikattu: when a story breaks loose",
+        "description": "The director and the writer on turning the short story Maoist into Jallikattu, a film that ran wild across the world’s festivals.",
+        "venue": "sngcc",
+        "strand": "cinema",
+        "format": "conversation",
+        "speakers": [
+          "lijo-jose-pellissery",
+          "s-hareesh"
+        ],
+        "guests": [],
+        "language": "Malayalam",
+        "highlight": true
+      },
+      {
+        "start": "15:00",
+        "end": "16:30",
+        "title": "Carry a poem across",
+        "description": "Translate a Malayalam poem into English, or the other way, with working translators. No experience needed, just two languages.",
+        "venue": "8point",
+        "strand": "literature",
+        "format": "workshop",
+        "speakers": [],
+        "guests": [
+          "Poet-translators (invited)"
+        ],
+        "language": "Bilingual",
+        "highlight": false
+      },
+      {
+        "start": "15:30",
+        "end": "16:30",
+        "title": "Travancore, retold",
+        "description": "The historian behind The Ivory Throne on queens, courts and the art of writing history that people actually want to read.",
+        "venue": "sngcc",
+        "strand": "ideas",
+        "format": "conversation",
+        "speakers": [
+          "manu-s-pillai"
+        ],
+        "guests": [],
+        "language": "English",
+        "highlight": false
+      },
+      {
+        "start": "17:00",
+        "end": "18:30",
+        "title": "Poetry Slam: the heats",
+        "description": "Three minutes, one mic, no mercy. College poets compete for a place in Monday’s final.",
+        "venue": "8point",
+        "strand": "youth",
+        "format": "performance",
+        "speakers": [],
+        "guests": [
+          "College teams from across Kerala"
+        ],
+        "language": "Bilingual",
+        "highlight": false
+      },
+      {
+        "start": "19:00",
+        "title": "Khasakkinte Ithihasam: second night",
+        "description": "The second of three performances. Evening performance; exact time to be confirmed. Ticketed separately: ₹1,500, or ₹1,600 with a Festival Pass for all five days.",
+        "strand": "theatre",
+        "format": "performance",
+        "speakers": [],
+        "guests": [],
+        "language": "Malayalam",
+        "highlight": true,
+        "link": {
+          "href": "/khasak#tickets",
+          "label": "Choose your ticket"
+        }
+      },
+      {
+        "start": "19:00",
+        "end": "21:30",
+        "title": "Indie & Rap Night",
+        "description": "The festival turns up the volume: Malayalam rap, indie bands and spoken word.",
+        "venue": "sngcc",
+        "strand": "youth",
+        "format": "performance",
+        "speakers": [],
+        "guests": [
+          "Independent musicians and rappers from Kerala (invited)"
+        ],
+        "language": "Bilingual",
+        "highlight": false
+      },
+      {
+        "start": "19:30",
+        "end": "21:30",
+        "title": "Cinema by the lake: Jallikattu",
+        "description": "An open-air screening on the lakeside, with English subtitles. Subject to screening rights.",
+        "venue": "8point",
+        "strand": "cinema",
+        "format": "screening",
+        "speakers": [],
+        "guests": [],
+        "language": "Malayalam",
+        "highlight": false
+      }
+    ]
+  },
+  {
+    "id": "2027-01-03",
+    "date": "2027-01-03",
+    "label": "Day 4",
+    "theme": "The long road.",
+    "blurb": "Journeys of every kind: to over a hundred countries, into silence, across a desert on film, and back through a thousand years of Kollam’s own history. Sunday ends with song, and Khasak’s final night.",
+    "allDay": [
+      "Book fair · 10:00–21:00",
+      "Food festival · 17:00–23:00",
+      "Exhibition: Eight Arms, art on Ashtamudi · 8 Point Art Cafe · 10:00–20:00"
+    ],
+    "sessions": [
+      {
+        "start": "06:30",
+        "end": "07:45",
+        "title": "Sunrise with Sri M",
+        "description": "The author of Apprenticed to a Himalayan Master on walking, listening and the journey within, followed by a few minutes of shared silence by the lake.",
+        "venue": "8point",
+        "strand": "ideas",
+        "format": "conversation",
+        "speakers": [
+          "sri-m"
+        ],
+        "guests": [],
+        "language": "English",
+        "highlight": false
+      },
+      {
+        "start": "10:00",
+        "end": "11:00",
+        "title": "The world is a classroom",
+        "description": "The creator of Sancharam on travelling to over a hundred countries with a camera, and what Kerala can learn from the world.",
+        "venue": "sngcc",
+        "strand": "ideas",
+        "format": "conversation",
+        "speakers": [
+          "santhosh-george-kulangara"
+        ],
+        "guests": [],
+        "language": "Malayalam",
+        "highlight": true
+      },
+      {
+        "start": "11:00",
+        "end": "13:00",
+        "title": "Kerala murals: a hands-on workshop",
+        "description": "Learn the lines, colours and stories of Kerala’s mural tradition, and paint a small panel to take home.",
+        "venue": "8point",
+        "strand": "art",
+        "format": "workshop",
+        "speakers": [],
+        "guests": [
+          "Mural artists (invited)"
+        ],
+        "language": "Malayalam",
+        "highlight": false
+      },
+      {
+        "start": "11:30",
+        "end": "12:30",
+        "title": "Quilon: the port that named a calendar",
+        "description": "Kollam’s thousand-year story: the port Marco Polo called Coilum, traders from China and Arabia, and the Kollam Era that still dates the Malayalam calendar.",
+        "venue": "sngcc",
+        "strand": "ideas",
+        "format": "conversation",
+        "speakers": [
+          "manu-s-pillai"
+        ],
+        "guests": [],
+        "language": "English",
+        "highlight": true
+      },
+      {
+        "start": "14:00",
+        "end": "15:15",
+        "title": "Aadujeevitham: sixteen years to film a novel",
+        "description": "The director on bringing Benyamin’s novel of survival in the desert to the screen as The Goat Life, a journey that took sixteen years.",
+        "venue": "sngcc",
+        "strand": "cinema",
+        "format": "conversation",
+        "speakers": [
+          "blessy"
+        ],
+        "guests": [],
+        "language": "Malayalam",
+        "highlight": true
+      },
+      {
+        "start": "15:00",
+        "end": "16:30",
+        "title": "Kites over Ashtamudi",
+        "description": "Make a kite from paper and bamboo, write a line of poetry on its tail, and fly it by the lake. Ages 6 and up.",
+        "strand": "children",
+        "format": "workshop",
+        "speakers": [],
+        "guests": [
+          "Kite makers (to be announced)"
+        ],
+        "language": "Malayalam",
+        "highlight": false
+      },
+      {
+        "start": "15:30",
+        "end": "16:45",
+        "title": "Freedom to write",
+        "description": "Three writers who have never been afraid of an argument, on courage, censorship and the reader’s right to disagree.",
+        "venue": "sngcc",
+        "strand": "ideas",
+        "format": "panel",
+        "speakers": [
+          "zacharia",
+          "sara-joseph",
+          "santhosh-echikkanam"
+        ],
+        "guests": [],
+        "language": "Malayalam",
+        "highlight": false
+      },
+      {
+        "start": "17:00",
+        "end": "18:30",
+        "title": "Reels & Short-Film Challenge: the shortlist",
+        "description": "The best 60-second reels and short films made for the festival, on the big screen, with an audience vote.",
+        "venue": "8point",
+        "strand": "youth",
+        "format": "screening",
+        "speakers": [],
+        "guests": [
+          "Young filmmakers from Kerala’s colleges"
+        ],
+        "language": "Bilingual",
+        "highlight": false
+      },
+      {
+        "start": "18:00",
+        "end": "20:00",
+        "title": "Words for music",
+        "description": "The lyricist and the composer on how a song is made, where the words end and the tune begins, with live performances of songs old and new.",
+        "venue": "sngcc",
+        "strand": "music",
+        "format": "performance",
+        "speakers": [
+          "vairamuthu",
+          "ouseppachan"
+        ],
+        "guests": [],
+        "language": "Bilingual",
+        "highlight": true
+      },
+      {
+        "start": "19:00",
+        "title": "Khasakkinte Ithihasam: final night",
+        "description": "The last of three performances. Evening performance; exact time to be confirmed. Ticketed separately: ₹1,500, or ₹1,600 with a Festival Pass for all five days.",
+        "strand": "theatre",
+        "format": "performance",
+        "speakers": [],
+        "guests": [],
+        "language": "Malayalam",
+        "highlight": true,
+        "link": {
+          "href": "/khasak#tickets",
+          "label": "Choose your ticket"
+        }
+      }
+    ]
+  },
+  {
+    "id": "2027-01-04",
+    "date": "2027-01-04",
+    "label": "Day 5",
+    "theme": "The next chapter.",
+    "blurb": "The last day belongs to what comes next: a veteran of stage and screen, a masterclass for storytellers, the poetry slam final, the Khasak company in conversation, and three generations of writers closing the book, for now.",
+    "allDay": [
+      "Book fair · 10:00–20:00",
+      "Food festival · 17:00–22:00",
+      "Exhibition: Eight Arms, art on Ashtamudi · 8 Point Art Cafe · 10:00–18:00"
+    ],
+    "sessions": [
+      {
+        "start": "07:00",
+        "end": "08:00",
+        "title": "Morning ragas by the lake",
+        "description": "A quiet start to the last day: violin and voice on the lakeside deck.",
+        "venue": "8point",
+        "strand": "music",
+        "format": "performance",
+        "speakers": [],
+        "guests": [
+          "Carnatic musicians (invited)"
+        ],
+        "highlight": false
+      },
+      {
+        "start": "10:00",
+        "end": "11:00",
+        "title": "A life on stage and screen",
+        "description": "From his father N. N. Pillai’s theatre to the centenarian he played in Pookkaalam: the actor on a lifetime of performing.",
+        "venue": "sngcc",
+        "strand": "theatre",
+        "format": "conversation",
+        "speakers": [
+          "vijayaraghavan"
+        ],
+        "guests": [],
+        "language": "Malayalam",
+        "highlight": true
+      },
+      {
+        "start": "11:00",
+        "end": "13:00",
+        "title": "Screenwriting from books: a masterclass",
+        "description": "How to read a novel like a screenwriter: structure, point of view, and the scenes that were never in the book. Limited places.",
+        "venue": "8point",
+        "strand": "cinema",
+        "format": "workshop",
+        "speakers": [
+          "shyamaprasad"
+        ],
+        "guests": [],
+        "language": "Bilingual",
+        "highlight": false
+      },
+      {
+        "start": "11:30",
+        "end": "12:30",
+        "title": "The art of the Kerala temple",
+        "description": "The art historian on murals, wood carving and the stories painted on temple walls, and how to look at them.",
+        "venue": "sngcc",
+        "strand": "art",
+        "format": "conversation",
+        "speakers": [
+          "m-g-sasibhooshan"
+        ],
+        "guests": [],
+        "language": "Malayalam",
+        "highlight": false
+      },
+      {
+        "start": "14:00",
+        "end": "15:30",
+        "title": "Poetry Slam: the final",
+        "description": "The best college poets of the festival face off for the KILF 2027 slam title.",
+        "strand": "youth",
+        "format": "performance",
+        "speakers": [],
+        "guests": [
+          "Finalists from Saturday’s heats",
+          "Judges: poets and performers (invited)"
+        ],
+        "language": "Bilingual",
+        "highlight": true
+      },
+      {
+        "start": "15:30",
+        "end": "16:30",
+        "title": "After Khasak: the company in conversation",
+        "description": "Three nights on, the director and the company on staging a novel that readers carry in their heads.",
+        "venue": "sngcc",
+        "strand": "theatre",
+        "format": "conversation",
+        "speakers": [],
+        "guests": [
+          "Director Deepan Sivaraman and the Khasakkinte Ithihasam company (invited)"
+        ],
+        "language": "Malayalam",
+        "highlight": false
+      },
+      {
+        "start": "17:00",
+        "end": "18:15",
+        "title": "Three generations, one language",
+        "description": "The closing conversation: three novelists from three generations on where the Malayalam novel came from, and where it goes next.",
+        "venue": "sngcc",
+        "strand": "literature",
+        "format": "panel",
+        "speakers": [
+          "m-mukundan",
+          "subhash-chandran",
+          "akhil-p-dharmajan"
+        ],
+        "guests": [],
+        "language": "Malayalam",
+        "highlight": true
+      },
+      {
+        "start": "18:30",
+        "end": "19:00",
+        "title": "Closing the book, for now",
+        "description": "Thank-yous, the slam champion’s winning poem, and a promise to meet again by the lake.",
+        "format": "ceremony",
+        "speakers": [],
+        "guests": [],
+        "language": "Bilingual",
+        "highlight": false
+      },
+      {
+        "start": "19:00",
+        "end": "21:30",
+        "title": "Songs of the shore",
+        "description": "The closing concert: Kerala’s folk songs, boat songs and new sounds, under the open sky.",
+        "strand": "music",
+        "format": "performance",
+        "speakers": [],
+        "guests": [
+          "Folk and fusion artists from Kerala (invited)"
+        ],
+        "language": "Malayalam",
+        "highlight": false
+      }
+    ]
+  }
+]

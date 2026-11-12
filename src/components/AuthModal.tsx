@@ -1,17 +1,21 @@
 'use client';
 
 import { useEffect, useId, useRef, useState, type FormEvent } from 'react';
+import { usePathname } from 'next/navigation';
+import { SmartLink } from './SmartLink';
 import { Icon } from './Icon';
 import { LimeButton } from './LimeButton';
 import * as auth from '@/lib/auth';
-import { PASSWORD_HINT, validPassword, type Guest } from '@/lib/auth';
+import { PASSWORD_HINT, validPassword, type AuthRequest, type Guest } from '@/lib/auth';
+import { useGuest } from '@/lib/useGuest';
+import { localizePath, parsePath } from '@/i18n/ui';
 
-type View = 'login' | 'register' | 'forgot' | 'reset' | 'done';
+type View = 'login' | 'register' | 'forgot' | 'reset';
 
 const control =
-  'block w-full rounded-none border border-line bg-white py-3.5 text-base text-navy placeholder:text-muted/70 transition-colors hover:border-navy/40 focus:border-blue focus:outline-none focus:ring-2 focus:ring-blue/20 aria-[invalid=true]:border-coral-ink aria-[invalid=true]:ring-coral-ink/20';
+  'block w-full rounded-none border border-line bg-white py-3.5 text-base text-navy placeholder:text-muted/70 transition-colors [@media(max-height:820px)]:py-3 hover:border-navy/40 focus:border-blue focus:outline-none focus:ring-2 focus:ring-blue/20 aria-[invalid=true]:border-coral-ink aria-[invalid=true]:ring-coral-ink/20';
 
-const copy: Record<Exclude<View, 'done'>, { eyebrow: string; title: string; lead: string }> = {
+const copy: Record<View, { eyebrow: string; title: string; lead: string }> = {
   login: { eyebrow: 'Guest login', title: 'Welcome back.', lead: 'Sign in to manage your passes and bookings.' },
   register: { eyebrow: 'New guest', title: 'Join the festival.', lead: 'Create an account to book passes for KILF 2027.' },
   forgot: { eyebrow: 'Reset password', title: 'Forgot it?', lead: 'Enter your email and we will send a reset link.' },
@@ -77,38 +81,41 @@ function TextField({ label, name, type = 'text', value, onChange, autoComplete, 
 }
 
 /**
- * Account button for the header plus the login popup it opens (a native
- * <dialog>: focus trap, Esc and backdrop come for free). Other components can
- * open it with window.dispatchEvent(new Event('kilf:auth')).
+ * The login popup, mounted once in the header (a native <dialog>: focus trap, Esc
+ * and backdrop come for free). Anything can open it with openLogin() or
+ * requireLogin() from lib/auth; on success it closes itself and reports the
+ * guest through a `kilf:auth-result` event, so a booking in progress resumes
+ * exactly where it was.
  */
-export function AccountButton() {
+export function AuthDialog() {
   const dlg = useRef<HTMLDialogElement>(null);
-  const [guest, setGuest] = useState<Guest | null>(null);
-  const [menu, setMenu] = useState(false);
+  const success = useRef<Guest | null>(null);
   const [view, setView] = useState<View>('login');
   const [busy, setBusy] = useState(false);
   const [formError, setFormError] = useState('');
   const [notice, setNotice] = useState('');
+  const [reason, setReason] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [f, setF] = useState({ name: '', email: '', password: '', confirm: '', token: '' });
   const set = (k: keyof typeof f) => (v: string) => setF((p) => ({ ...p, [k]: v }));
 
   useEffect(() => {
-    auth.me().then(setGuest);
-    const open = () => openDialog('login');
+    const open = (e: Event) => {
+      const d = (e as CustomEvent<AuthRequest | undefined>).detail;
+      setReason(d?.reason ?? '');
+      success.current = null;
+      go(d?.view ?? 'login');
+      if (!dlg.current?.open) {
+        dlg.current?.showModal();
+        document.documentElement.classList.add('overflow-hidden');
+      }
+    };
     window.addEventListener('kilf:auth', open);
     return () => window.removeEventListener('kilf:auth', open);
   }, []);
 
-  function openDialog(v: View) {
-    go(v);
-    if (!dlg.current?.open) {
-      dlg.current?.showModal();
-      document.documentElement.classList.add('overflow-hidden');
-    }
-  }
   function closeDialog() {
-    dlg.current?.close();
+    if (!busy) dlg.current?.close();
   }
   function go(v: View) {
     setView(v);
@@ -116,6 +123,11 @@ export function AccountButton() {
     setErrors({});
     if (v !== 'reset') setNotice('');
     setF((p) => ({ ...p, password: '', confirm: '' }));
+  }
+  function signedIn(g: Guest) {
+    success.current = g;
+    setF({ name: '', email: '', password: '', confirm: '', token: '' });
+    dlg.current?.close();
   }
 
   async function submit(e: FormEvent) {
@@ -136,11 +148,9 @@ export function AccountButton() {
     setBusy(true);
     try {
       if (view === 'login') {
-        setGuest(await auth.login(email, f.password));
-        setView('done');
+        signedIn(await auth.login(email, f.password));
       } else if (view === 'register') {
-        setGuest(await auth.register({ name: f.name.trim(), email, password: f.password, confirmPassword: f.confirm }));
-        setView('done');
+        signedIn(await auth.register({ name: f.name.trim(), email, password: f.password, confirmPassword: f.confirm }));
       } else if (view === 'forgot') {
         const token = await auth.forgotPassword(email);
         setF((p) => ({ ...p, token: token ?? '' }));
@@ -152,157 +162,166 @@ export function AccountButton() {
         setNotice('Password reset. Sign in with your new password.');
       }
     } catch (err) {
-      setFormError(err instanceof Error ? err.message : 'Something went wrong.');
+      const msg = err instanceof Error ? err.message : 'Something went wrong.';
+      // Registering an email that already has an account: point them at login instead of a dead end.
+      if (view === 'register' && err instanceof auth.AuthError && err.status === 409) {
+        go('login');
+        setNotice('That email already has an account. Log in instead.');
+      } else setFormError(msg);
     } finally {
       setBusy(false);
     }
   }
 
-  async function signOut() {
-    setMenu(false);
-    await auth.logout();
-    setGuest(null);
-  }
-
-  const c = view === 'done' ? null : copy[view];
-  const first = guest?.name.split(' ')[0];
+  const c = copy[view];
 
   return (
-    <>
-      {guest ? (
-        <div className="relative">
+    <dialog
+      ref={dlg}
+      aria-labelledby="auth-title"
+      onClose={() => {
+        document.documentElement.classList.remove('overflow-hidden');
+        window.dispatchEvent(new CustomEvent('kilf:auth-result', { detail: success.current }));
+      }}
+      onCancel={(e) => busy && e.preventDefault()}
+      onClick={(e) => e.target === dlg.current && closeDialog()}
+      className="auth-dialog m-auto w-[min(100vw-1.5rem,56rem)] max-h-[calc(100dvh-1.5rem)] overflow-hidden border-0 bg-transparent p-0 text-navy backdrop:bg-ink/60 backdrop:backdrop-blur-sm"
+    >
+      <div className="grid max-h-[calc(100dvh-1.5rem)] grid-rows-[minmax(0,1fr)] md:grid-cols-[0.82fr_1fr]">
+        {/* Brand panel */}
+        <aside className="on-dark relative hidden flex-col justify-between overflow-hidden bg-footer p-9 text-white md:flex">
+          <svg aria-hidden="true" viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice" className="absolute inset-0 size-full opacity-60">
+            <g fill="none" stroke="#b8c3f0" strokeOpacity=".28" strokeWidth="1.2">
+              <path d="M-20 380C80 340 150 420 260 380S360 340 430 372" />
+              <path d="M-20 430C90 390 160 470 270 430S370 390 430 422" />
+              <path d="M-20 480C100 440 170 520 280 480S380 440 430 472" />
+              <path d="M-20 530C110 490 180 570 290 530S390 490 430 522" />
+            </g>
+            <circle cx="300" cy="120" r="46" fill="#e7ef92" fillOpacity=".92" />
+          </svg>
+          <p className="eyebrow relative text-lime">KILF 2027</p>
+          <div className="relative">
+            <p className="display text-[2.1rem] text-white">Where Kollam&rsquo;s lake meets the written word.</p>
+            <p className="mt-4 text-sm leading-relaxed text-mist">31 December 2026 – 4 January 2027<br />Kollam International Literature Festival</p>
+          </div>
+        </aside>
+
+        {/* Form panel */}
+        <div className="relative min-h-0 overflow-y-auto overscroll-contain bg-cream p-5 sm:p-9 [@media(max-height:820px)]:sm:py-6">
           <button
             type="button"
-            onClick={() => setMenu((m) => !m)}
-            aria-expanded={menu}
-            className="acct inline-flex min-h-11 items-center gap-2 px-3 text-sm font-semibold ring-1 ring-inset ring-current/35 transition-colors hover:bg-current/10"
+            onClick={closeDialog}
+            aria-label="Close"
+            className="absolute right-3 top-3 grid size-11 place-items-center text-navy ring-1 ring-inset ring-navy/20 transition-colors hover:bg-navy/5"
           >
-            <Icon name="user" size={18} />
-            <span className="hidden max-w-[7rem] truncate sm:inline">{first}</span>
+            <Icon name="close" size={20} />
           </button>
-          {menu && (
-            <div className="absolute right-0 top-full z-10 mt-2 w-60 border border-line bg-white p-4 text-navy shadow-[0_18px_40px_-18px_rgb(15_26_71/0.35)]">
-              <p className="truncate font-display text-base font-semibold">{guest.name}</p>
-              <p className="truncate text-sm text-muted">{guest.email}</p>
-              <button type="button" onClick={signOut} className="mt-3 min-h-11 w-full border border-navy/30 text-sm font-semibold hover:bg-navy/5">
-                Log out
-              </button>
-            </div>
+
+          {reason && (
+            <p className="mb-5 mr-12 flex items-start [@media(max-height:820px)]:mb-3 [@media(max-height:820px)]:py-2 gap-2.5 border-l-4 border-lime-deep bg-lime/40 px-4 py-3 text-sm font-semibold text-navy">
+              <Icon name="lock" size={18} className="mt-0.5 shrink-0" />
+              {reason}
+            </p>
           )}
-        </div>
-      ) : (
-        <LimeButton label="Log in" size="sm" onClick={() => openDialog('login')} className="hdr-cta min-w-[8.5rem] justify-between !gap-6" />
-      )}
 
-      <dialog
-        ref={dlg}
-        aria-labelledby="auth-title"
-        onClose={() => {
-          document.documentElement.classList.remove('overflow-hidden');
-        }}
-        onClick={(e) => e.target === dlg.current && closeDialog()}
-        className="auth-dialog m-auto w-[min(100vw-1.5rem,56rem)] max-h-[calc(100dvh-1.5rem)] overflow-hidden border-0 bg-transparent p-0 text-navy backdrop:bg-ink/60 backdrop:backdrop-blur-sm"
-      >
-        <div className="grid max-h-[calc(100dvh-1.5rem)] md:grid-cols-[0.82fr_1fr]">
-          {/* Brand panel */}
-          <aside className="on-dark relative hidden flex-col justify-between overflow-hidden bg-footer p-9 text-white md:flex">
-            <svg aria-hidden="true" viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice" className="absolute inset-0 size-full opacity-60">
-              <g fill="none" stroke="#b8c3f0" strokeOpacity=".28" strokeWidth="1.2">
-                <path d="M-20 380C80 340 150 420 260 380S360 340 430 372" />
-                <path d="M-20 430C90 390 160 470 270 430S370 390 430 422" />
-                <path d="M-20 480C100 440 170 520 280 480S380 440 430 472" />
-                <path d="M-20 530C110 490 180 570 290 530S390 490 430 522" />
-              </g>
-              <circle cx="300" cy="120" r="46" fill="#e7ef92" fillOpacity=".92" />
-            </svg>
-            <p className="eyebrow relative text-lime">KILF 2027</p>
-            <div className="relative">
-              <p className="display text-[2.1rem] text-white">Where Kollam&rsquo;s lake meets the written word.</p>
-              <p className="mt-4 text-sm leading-relaxed text-mist">31 December 2026 – 4 January 2027<br />Kollam International Literature Festival</p>
-            </div>
-          </aside>
+          <form onSubmit={submit} noValidate className="pr-0 pt-1">
+            <p className="eyebrow text-blue">{c.eyebrow}</p>
+            <h2 id="auth-title" className="display mt-2 pr-12 text-[1.75rem] text-navy sm:text-[2.35rem] [@media(max-height:820px)]:sm:text-[2rem]">{c.title}</h2>
+            <p className="mt-2 text-[0.95rem] text-muted">{c.lead}</p>
 
-          {/* Form panel */}
-          <div className="relative overflow-y-auto bg-cream p-6 sm:p-9">
-            <button
-              type="button"
-              onClick={closeDialog}
-              aria-label="Close"
-              className="absolute right-3 top-3 grid size-11 place-items-center text-navy ring-1 ring-inset ring-navy/20 transition-colors hover:bg-navy/5"
-            >
-              <Icon name="close" size={20} />
-            </button>
-
-            {view === 'done' ? (
-              <div className="py-6 pr-8">
-                <span className="grid size-12 place-items-center bg-lime text-ink"><Icon name="check" size={24} /></span>
-                <h2 id="auth-title" className="display mt-5 text-[2rem] text-navy">You&rsquo;re in{first ? `, ${first}` : ''}.</h2>
-                <p className="mt-2 text-muted">Your account is ready. See you at the lake.</p>
-                <div className="mt-7 flex flex-wrap gap-3">
-                  <LimeButton href="/passes" label="Browse passes" />
-                  <LimeButton label="Close" variant="ghost" arrow={false} onClick={closeDialog} />
-                </div>
-              </div>
-            ) : (
-              c && (
-                <form onSubmit={submit} noValidate className="pr-0 pt-1">
-                  <p className="eyebrow text-blue">{c.eyebrow}</p>
-                  <h2 id="auth-title" className="display mt-2 pr-12 text-[2rem] text-navy sm:text-[2.35rem]">{c.title}</h2>
-                  <p className="mt-2 text-[0.95rem] text-muted">{c.lead}</p>
-
-                  {(notice || formError) && (
-                    <p role={formError ? 'alert' : 'status'} className={`mt-5 border-l-4 px-4 py-3 text-sm font-semibold ${formError ? 'border-coral-ink bg-coral-soft text-coral-deep' : 'border-blue bg-sky text-navy'}`}>
-                      {formError || notice}
-                    </p>
-                  )}
-
-                  <div className="mt-6 grid gap-4">
-                    {view === 'register' && <TextField label="Full name" name="name" value={f.name} onChange={set('name')} autoComplete="name" error={errors.name} />}
-                    {view !== 'reset' && <TextField label="Email" name="email" type="email" value={f.email} onChange={set('email')} autoComplete="email" error={errors.email} />}
-                    {view === 'reset' && <TextField label="Reset token" name="token" value={f.token} onChange={set('token')} autoComplete="off" error={errors.token} />}
-                    {view !== 'forgot' && (
-                      <PasswordField
-                        label={view === 'login' ? 'Password' : 'New password'}
-                        name="password"
-                        value={f.password}
-                        onChange={set('password')}
-                        autoComplete={view === 'login' ? 'current-password' : 'new-password'}
-                        hint={view === 'login' ? undefined : PASSWORD_HINT}
-                        error={errors.password}
-                      />
-                    )}
-                    {(view === 'register' || view === 'reset') && (
-                      <PasswordField label="Confirm password" name="confirmPassword" value={f.confirm} onChange={set('confirm')} autoComplete="new-password" error={errors.confirm} />
-                    )}
-                  </div>
-
-                  {view === 'login' && (
-                    <button type="button" onClick={() => go('forgot')} className="mt-3 min-h-11 text-sm font-semibold text-blue underline-offset-4 hover:underline">
-                      Forgot password?
-                    </button>
-                  )}
-
-                  <LimeButton
-                    type="submit"
-                    size="lg"
-                    disabled={busy}
-                    className={`mt-4 w-full justify-between ${busy ? 'opacity-70' : ''}`}
-                    label={busy ? 'Please wait…' : { login: 'Log in', register: 'Create account', forgot: 'Send reset link', reset: 'Reset password' }[view]}
-                  />
-
-                  <p className="mt-5 text-center text-sm text-muted">
-                    {view === 'login' ? (
-                      <>New to KILF? <button type="button" onClick={() => go('register')} className="min-h-11 font-semibold text-blue underline-offset-4 hover:underline">Create an account</button></>
-                    ) : (
-                      <>{view === 'register' ? 'Already registered?' : 'Remembered it?'} <button type="button" onClick={() => go('login')} className="min-h-11 font-semibold text-blue underline-offset-4 hover:underline">Log in</button></>
-                    )}
-                  </p>
-                </form>
-              )
+            {(notice || formError) && (
+              <p role={formError ? 'alert' : 'status'} className={`mt-5 border-l-4 px-4 py-3 text-sm font-semibold ${formError ? 'border-coral-ink bg-coral-soft text-coral-deep' : 'border-blue bg-sky text-navy'}`}>
+                {formError || notice}
+              </p>
             )}
-          </div>
+
+            <div className="mt-6 grid gap-4 [@media(max-height:820px)]:mt-4 [@media(max-height:820px)]:gap-3">
+              {view === 'register' && <TextField label="Full name" name="name" value={f.name} onChange={set('name')} autoComplete="name" error={errors.name} />}
+              {view !== 'reset' && <TextField label="Email" name="email" type="email" value={f.email} onChange={set('email')} autoComplete="email" error={errors.email} />}
+              {view === 'reset' && <TextField label="Reset token" name="token" value={f.token} onChange={set('token')} autoComplete="off" error={errors.token} />}
+              {view !== 'forgot' && (
+                <PasswordField
+                  label={view === 'login' ? 'Password' : 'New password'}
+                  name="password"
+                  value={f.password}
+                  onChange={set('password')}
+                  autoComplete={view === 'login' ? 'current-password' : 'new-password'}
+                  hint={view === 'login' ? undefined : PASSWORD_HINT}
+                  error={errors.password}
+                />
+              )}
+              {(view === 'register' || view === 'reset') && (
+                <PasswordField label="Confirm password" name="confirmPassword" value={f.confirm} onChange={set('confirm')} autoComplete="new-password" error={errors.confirm} />
+              )}
+            </div>
+
+            {view === 'login' && (
+              <button type="button" onClick={() => go('forgot')} className="mt-3 min-h-11 text-sm font-semibold text-blue underline-offset-4 hover:underline">
+                Forgot password?
+              </button>
+            )}
+
+            <LimeButton
+              type="submit"
+              size="lg"
+              disabled={busy}
+              className={`mt-4 w-full justify-between ${busy ? 'opacity-70' : ''}`}
+              label={busy ? 'Please wait…' : { login: 'Log in', register: 'Create account', forgot: 'Send reset link', reset: 'Reset password' }[view]}
+            />
+
+            <p className="mt-5 text-center text-sm text-muted">
+              {view === 'login' ? (
+                <>New to KILF? <button type="button" onClick={() => go('register')} className="min-h-11 font-semibold text-blue underline-offset-4 hover:underline">Create an account</button></>
+              ) : (
+                <>{view === 'register' ? 'Already registered?' : 'Remembered it?'} <button type="button" onClick={() => go('login')} className="min-h-11 font-semibold text-blue underline-offset-4 hover:underline">Log in</button></>
+              )}
+            </p>
+          </form>
         </div>
-      </dialog>
-    </>
+      </div>
+    </dialog>
+  );
+}
+
+/**
+ * Header account control: "Log in" for guests, "Profile" (linking to the profile
+ * page) once signed in. `variant="menu"` is the full-width version for the mobile menu.
+ */
+export function AccountButton({ variant = 'bar' }: { variant?: 'bar' | 'menu' }) {
+  const guest = useGuest();
+  const { lang } = parsePath(usePathname());
+  const href = localizePath('/profile', lang);
+  const first = guest?.name.split(' ')[0];
+
+  if (variant === 'menu') {
+    return guest ? (
+      <LimeButton href={href} label={`Profile · ${first}`} className="w-full" />
+    ) : (
+      <LimeButton label="Log in" className="w-full" onClick={() => auth.openLogin()} disabled={guest === undefined} />
+    );
+  }
+  if (guest) {
+    return (
+      <SmartLink
+        href={href}
+        className="acct inline-flex min-h-11 min-w-[8.5rem] items-center justify-between gap-3 px-4 text-sm font-semibold ring-1 ring-inset ring-current/35 transition-colors hover:bg-current/10"
+      >
+        <span className="inline-flex items-center gap-2">
+          <span className="grid size-7 place-items-center rounded-full bg-lime text-[0.8rem] font-bold uppercase text-ink">{guest.name.charAt(0)}</span>
+          <span className="max-w-[7rem] truncate">Profile</span>
+        </span>
+        <span aria-hidden="true">↗</span>
+      </SmartLink>
+    );
+  }
+  return (
+    <LimeButton
+      label="Log in"
+      size="sm"
+      onClick={() => auth.openLogin()}
+      // Keep the slot steady while the stored session is checked.
+      aria-busy={guest === undefined}
+      className={`hdr-cta min-w-[8.5rem] justify-between !gap-6 ${guest === undefined ? 'opacity-0' : ''}`}
+    />
   );
 }

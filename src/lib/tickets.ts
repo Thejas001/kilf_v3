@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { API_URL } from './api';
 
 const ticketSchema = z.object({
   id: z.string(),
@@ -11,6 +12,11 @@ const ticketSchema = z.object({
   availableQuantity: z.number().nullish(),
   salesStart: z.string().nullish(),
   salesEnd: z.string().nullish(),
+  perks: z.array(z.string()).nullish(),
+  requiresDate: z.boolean().nullish(),
+  requiresShowSession: z.boolean().nullish(),
+  minAge: z.number().nullish(),
+  maxAge: z.number().nullish(),
 });
 const responseSchema = z.object({ success: z.boolean(), data: z.array(ticketSchema) });
 
@@ -18,7 +24,7 @@ export type Ticket = z.infer<typeof ticketSchema>;
 
 /** Fetches tickets from the backend. Returns null on any failure so callers can fall back to static content. */
 export async function fetchTickets(): Promise<Ticket[] | null> {
-  const base = (process.env.NEXT_PUBLIC_API_URL || 'https://api.kilf.in').replace(/\/$/, '');
+  const base = API_URL;
   if (!base) return null;
   try {
     const res = await fetch(`${base}/api/tickets?page=1&limit=50`, { next: { revalidate: 60 } });

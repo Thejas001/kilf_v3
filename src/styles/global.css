@@ -825,3 +825,30 @@ html[data-motion='paused'] *::after {
     will-change: auto;
   }
 }
+
+/* Booking pop-up */
+.bk-dialog { background: transparent; border: 0; padding: 0; overflow: visible; }
+.bk-dialog::backdrop { background: rgb(16 27 70 / 0.55); backdrop-filter: blur(8px); }
+.bk-dialog[open]::backdrop { animation: pop-fade 300ms ease-out; }
+.bk-dialog[open] .bk-card { animation: bk-rise 520ms cubic-bezier(0.16, 1, 0.3, 1); }
+.bk-stagger > * { animation: bk-item 560ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+.bk-stagger > *:nth-child(2) { animation-delay: 60ms; }
+.bk-stagger > *:nth-child(3) { animation-delay: 120ms; }
+.bk-stagger > *:nth-child(4) { animation-delay: 180ms; }
+.bk-stagger > *:nth-child(5) { animation-delay: 240ms; }
+.bk-orb { position: absolute; border-radius: 9999px; filter: blur(40px); opacity: 0.55; animation: bk-float 9s ease-in-out infinite alternate; pointer-events: none; }
+.bk-field { position: relative; }
+.bk-field input { width: 100%; border-radius: 14px; border: 1px solid var(--color-line); background: #fff; padding: 1.35rem 1rem 0.55rem; font-size: 1rem; color: var(--color-navy); transition: border-color 200ms, box-shadow 200ms; }
+.bk-field input:focus { outline: none; border-color: var(--color-blue-bright); box-shadow: 0 0 0 4px rgb(36 71 237 / 0.14); }
+.bk-field label { position: absolute; left: 1rem; top: 0.95rem; font-size: 1rem; color: var(--color-muted); pointer-events: none; transition: all 180ms ease; }
+.bk-field input:focus + label, .bk-field input:not(:placeholder-shown) + label { top: 0.45rem; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--color-blue-bright); }
+.bk-num { display: inline-block; animation: bk-tick 320ms cubic-bezier(0.16, 1, 0.3, 1); }
+.bk-shimmer { background: linear-gradient(90deg, var(--color-sky) 0%, #fff 50%, var(--color-sky) 100%); background-size: 200% 100%; animation: bk-shimmer 1.1s linear infinite; border-radius: 6px; }
+@keyframes bk-rise { from { opacity: 0; transform: translateY(40px) scale(0.96); } to { opacity: 1; transform: none; } }
+@keyframes bk-item { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+@keyframes bk-float { from { transform: translate(0, 0) scale(1); } to { transform: translate(30px, 20px) scale(1.2); } }
+@keyframes bk-tick { from { opacity: 0; transform: translateY(-40%); } to { opacity: 1; transform: none; } }
+@keyframes bk-shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .bk-dialog[open] .bk-card, .bk-stagger > *, .bk-orb, .bk-num, .bk-shimmer, .bk-dialog[open]::backdrop { animation: none; }
+}

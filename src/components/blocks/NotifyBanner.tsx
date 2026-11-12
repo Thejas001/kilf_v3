@@ -57,7 +57,7 @@ export function NotifyBanner({ id, formName, text, accent, lead, kicker, submitL
                   {f.label}
                   <span className="font-normal text-muted"> (optional)</span>
                 </legend>
-                <div className={['mt-2.5 grid gap-2.5', pills ? 'grid-cols-6' : 'sm:grid-cols-3'].join(' ')}>
+                <div className={['mt-2.5 gap-2.5', pills ? 'flex flex-wrap' : 'grid sm:grid-cols-3'].join(' ')}>
                   {f.options.map((o) => (
                     <label key={o} className="group cursor-pointer">
                       <input type="radio" name={f.name} value={o} className="peer sr-only" />
@@ -67,7 +67,7 @@ export function NotifyBanner({ id, formName, text, accent, lead, kicker, submitL
                           'hover:-translate-y-0.5 hover:border-blue/50 hover:shadow-md',
                           'peer-focus-visible:ring-2 peer-focus-visible:ring-blue/40',
                           'peer-checked:border-blue peer-checked:bg-blue peer-checked:text-white peer-checked:shadow-lg',
-                          pills ? 'h-12' : 'min-h-[3.5rem] px-3 py-3 leading-snug',
+                          pills ? 'h-11 whitespace-nowrap rounded-full px-4.5' : 'min-h-[3.5rem] px-3 py-3 leading-snug',
                         ].join(' ')}
                       >
                         {o}

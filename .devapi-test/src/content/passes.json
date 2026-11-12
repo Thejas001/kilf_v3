@@ -1,0 +1,48 @@
+[
+  {
+    "id": "day",
+    "order": 1,
+    "name": "Day Pass",
+    "audience": "For one day of the festival",
+    "description": "Pick your day and dive in: sessions, the book fair and the lakeside evening.",
+    "includes": [
+      "Entry to all sessions on the day",
+      "Book fair and exhibitions",
+      "Evening music by the lake"
+    ],
+    "highlighted": false,
+    "price": "₹299",
+    "priceNote": "per person, for one day"
+  },
+  {
+    "id": "festival",
+    "order": 2,
+    "name": "Festival Pass",
+    "audience": "All five days, 31 Dec – 4 Jan",
+    "description": "The whole story, from the midnight chapter to the final page.",
+    "includes": [
+      "Entry to all sessions, all five days",
+      "New Year's Eve by the lake",
+      "Book fair and exhibitions",
+      "Priority entry where seating is limited"
+    ],
+    "highlighted": true,
+    "price": "₹499",
+    "priceNote": "per person, all five days"
+  },
+  {
+    "id": "young-reader",
+    "order": 3,
+    "name": "Young Reader Pass",
+    "audience": "For students, all five days",
+    "description": "Made for students and young readers: every day of the festival. Bring your college ID.",
+    "includes": [
+      "Entry to all sessions, all five days",
+      "Youth stage: slams, open mics and more",
+      "Book fair and exhibitions"
+    ],
+    "highlighted": false,
+    "price": "₹199",
+    "priceNote": "per student, all five days"
+  }
+]
