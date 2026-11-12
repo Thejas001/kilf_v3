@@ -39,6 +39,8 @@ const en = {
   'nav.skip': 'Skip to content',
 
   'cta.register': 'Register',
+  'cta.bookPass': 'Book Pass',
+  'cta.bookNow': 'Book now',
   'cta.explore': 'Explore the programme',
   'cta.notify': 'Notify me',
   'cta.seeSpeakers': 'See all speakers',
@@ -309,6 +311,8 @@ const ml: Partial<Record<UIKey, string>> = {
   'nav.skip': 'ഉള്ളടക്കത്തിലേക്ക് പോകാം',
 
   'cta.register': 'രജിസ്റ്റർ ചെയ്യൂ',
+  'cta.bookPass': 'പാസ് ബുക്ക് ചെയ്യൂ',
+  'cta.bookNow': 'ഇപ്പോൾ ബുക്ക് ചെയ്യൂ',
   'cta.explore': 'പരിപാടികൾ കാണാം',
   'cta.notify': 'അറിയിപ്പ് നേടാം',
   'cta.seeSpeakers': 'എല്ലാ പ്രഭാഷകരെയും കാണാം',

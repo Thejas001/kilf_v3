@@ -51,7 +51,7 @@ export async function Passes({ lang }: Props) {
         <h2 id="passes-h" className="sr-only">
           Pass types
         </h2>
-{(() => {          const cards = passes.map((p) => ({ id: p.id, ...p.data }));          return cards.length > 3 ? (            <PassSlider passes={cards} />          ) : (            <ul className="grid border-l border-t border-line lg:grid-cols-3" data-reveal-group>              {cards.map((c, i) => (                <PassCard key={c.id} p={c} index={i} hi={c.highlighted} />              ))}            </ul>          );        })()}
+{(() => {          const cards = passes.map((p) => ({ id: p.id, ...p.data }));          return cards.length > 3 ? (            <PassSlider passes={cards} />          ) : (            <>            <div className="sm:hidden"><PassSlider passes={cards} /></div>            <ul className="hidden sm:grid border-l border-t border-line lg:grid-cols-3" data-reveal-group>              {cards.map((c, i) => (                <PassCard key={c.id} p={c} index={i} hi={c.highlighted} />              ))}            </ul>            </>          );        })()}
         <p className="mt-8 max-w-2xl text-sm text-muted">Prices in Indian rupees. Inclusions are indicative and will be confirmed when ticketing opens. Some sessions may have limited seating. Khasakkinte Ithihasam is ticketed separately.</p>
       </Section>
 
