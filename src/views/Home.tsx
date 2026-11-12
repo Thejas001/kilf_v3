@@ -77,7 +77,7 @@ export function Home({ lang }: Props) {
               {t('home.water')}
             </p>
             <div className="hero-in mt-9 flex flex-wrap items-center gap-x-8 gap-y-5" style={{ '--d': '0.28s' } as React.CSSProperties}>
-              <LimeButton href={lp('/get-involved#register')} label={t('cta.register')} size="lg" />
+              <LimeButton href={lp('/passes')} label={t('cta.bookPass')} size="lg" />
             </div>
             <p className="hero-in mt-10 flex flex-wrap items-baseline gap-x-3 gap-y-1" style={{ '--d': '0.36s' } as React.CSSProperties}>
               <span className="eyebrow">{t('site.dates')}</span>
@@ -251,7 +251,7 @@ export function Home({ lang }: Props) {
                 {t('home.khasak.quote')}
               </blockquote>
               <div className="mt-9 flex flex-wrap items-center gap-x-8 gap-y-4">
-                <LimeButton href={lp('/khasak#notify')} label={t('cta.notify')} size="lg" />
+                <LimeButton href={lp('/passes')} label={t('cta.bookNow')} size="lg" />
               </div>
               <p className="mt-4 max-w-md text-sm text-white/65">{t('home.khasak.bundle')}</p>
             </div>
@@ -267,7 +267,7 @@ export function Home({ lang }: Props) {
             <Headline id="involved-h" text={t('home.involved.h')} accent={t('home.involved.accent')} size="xl" className="mt-6" />
             <p className="mt-6 max-w-sm text-lg leading-relaxed text-muted">{t('home.involved.lead')}</p>
             <div className="mt-9 flex flex-wrap items-center gap-3">
-              <LimeButton href={lp('/get-involved#register')} label={t('cta.register')} />
+              <LimeButton href={lp('/passes')} label={t('cta.bookPass')} />
             </div>
           </div>
           <div className="lg:col-span-7">
