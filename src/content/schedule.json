@@ -11,21 +11,6 @@
     ],
     "sessions": [
       {
-        "start": "17:00",
-        "end": "18:00",
-        "title": "Why we still need stories",
-        "description": "The opening conversation. The novelist from Mahé, whose Delhi: A Soliloquy won the JCB Prize for Literature, on a lifetime of stories and why they matter more than ever.",
-        "venue": "sngcc",
-        "strand": "literature",
-        "format": "conversation",
-        "speakers": [
-          "m-mukundan"
-        ],
-        "guests": [],
-        "language": "Malayalam",
-        "highlight": true
-      },
-      {
         "start": "18:15",
         "end": "18:45",
         "title": "Lighting the lamp at sunset",
@@ -298,23 +283,6 @@
         "speakers": [],
         "guests": [
           "Malayalam, English and Tamil publishers (invited)"
-        ],
-        "language": "Bilingual",
-        "highlight": false
-      },
-      {
-        "start": "11:30",
-        "end": "12:45",
-        "title": "Mahé, Delhi and the world",
-        "description": "How a Malayalam novel travels: the author and his translators on carrying a language, its jokes and its silences, into English.",
-        "venue": "sngcc",
-        "strand": "literature",
-        "format": "conversation",
-        "speakers": [
-          "m-mukundan"
-        ],
-        "guests": [
-          "The translators of Delhi: A Soliloquy (invited)"
         ],
         "language": "Bilingual",
         "highlight": false
@@ -701,7 +669,6 @@
         "strand": "literature",
         "format": "panel",
         "speakers": [
-          "m-mukundan",
           "subhash-chandran",
           "akhil-p-dharmajan"
         ],
